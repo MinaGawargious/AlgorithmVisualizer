@@ -1,0 +1,155 @@
+:root {
+    --add-hover-color: pink;
+    --play-hover-color: red;
+    --header-hover-color: #2196f3;
+}
+
+body{
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: column;
+}
+header{
+    width: 100%;
+    background: #ccc;
+}
+header ul{
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+}
+header ul li{
+    list-style: none;
+    position: relative;
+    padding: 10px 0;
+    /* transition: 0.5s; */
+    box-sizing: border-box;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+header ul li:hover{
+    background: var(--header-hover-color);
+}
+header ul li:last-child{
+    border-right: none;
+}
+header ul li a{
+    text-decoration: none;
+    padding: 0 20px;
+    color: #fff;
+}
+header ul li ul{
+    position: absolute;
+    top: 38px;
+    left: 0;
+    background: #000;
+    display: block;
+    width: 100%;
+    /* transition: 0.5s; */ 
+    /* change to 0 and hidden */
+    opacity: 0;
+    visibility: hidden;
+}
+header ul li:hover ul{
+    opacity: 1;
+    visibility: visible;
+}
+header ul li ul li{
+    border-right: none;
+    margin: 0;
+    /* padding: 10px 10px 10px 10px; */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+}
+header ul li ul li a{
+    padding: 0;
+    margin: 0;
+}
+#logo{
+    text-transform: uppercase;
+}
+
+.content{
+    /* background: orange; */
+    margin: auto;
+    padding: auto;
+    width: 100%;    
+    flex: 1;
+}
+svg{
+    width: 100%;
+    height: 100%;
+}
+
+.add {
+    width:50px;
+    height:50px;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: linear-gradient(#000,#000) top left, linear-gradient(#000,#000) top right, linear-gradient(#000,#000) bottom left, linear-gradient(#000,#000) bottom right;
+    background-size: calc(50% - 1px) calc(50% - 1px); /*thickness = 2px (2*1px) */
+    background-repeat:no-repeat;
+    border:10px solid #000; /*length = 30px (50px - 2x10px) */
+    box-sizing:border-box;
+    border-radius:50%;
+    z-index: 1;
+}
+.add::before{
+    content: "";
+    width:50px;
+    height:50px;
+    bottom: -10px;
+    right: -10px;
+    position: absolute;
+    background: linear-gradient(var(--add-hover-color),var(--add-hover-color)) top left, linear-gradient(var(--add-hover-color),var(--add-hover-color)) top right, linear-gradient(var(--add-hover-color),var(--add-hover-color)) bottom left, linear-gradient(var(--add-hover-color),var(--add-hover-color)) bottom right;
+    background-size: calc(50% - 1px) calc(50% - 1px); /*thickness = 2px (2*1px) */
+    background-repeat:no-repeat;
+    border:10px solid var(--add-hover-color); /*length = 30px (50px - 2x10px) */
+    box-sizing:border-box;
+    border-radius:50%;
+    opacity:0;
+    z-index: -1;
+    transition: opacity 0.35s ease;
+}
+.add:hover::before{
+    opacity:1;
+}
+
+.circle {
+    stroke: var(--play-hover-color);
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    transition: all 0.5s ease-in-out;
+    opacity: 0.3;
+}
+.playBut {
+    display: inline-block;
+    width:50px;
+    height:50px;
+    position: absolute;
+    bottom: 70px;
+    right: 10px;
+    transition: all 0.5s ease;
+}
+.playBut .triangle {
+    transition: all 0.7s ease-in-out;
+    stroke-dasharray: 240;
+    stroke-dashoffset: 480;
+    stroke: #000;
+    transform: translateY(0);
+}
+.playBut:hover .triangle {
+    stroke-dashoffset: 0;
+    opacity: 1;
+    stroke: var(--play-hover-color);
+}
+.playBut:hover .circle {
+    stroke-dashoffset: 0;
+    opacity: 1;
+}
+/* TODO: Media queries (https://www.youtube.com/watch?v=krZvPvpOHm4&ab_channel=OnlineTutorials) 5:44*/

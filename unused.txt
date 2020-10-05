@@ -1,0 +1,237 @@
+
+// node.setAttributeNS(null, "draggable", "true");
+// node.addEventListener("dragstart", (event) => {
+    //     event.dataTransfer.dropEffect = "move";
+    //     event.dataTransfer.setData("textplain", event.target.id);
+    // });
+
+
+
+// setAttributes(newLine, {"x1": x1 + radius*Math.cos(theta), "y1": y1 + radius*Math.sin(theta), "x2": center[0] - radius*Math.cos((Math.PI/2) - theta), "y2": center[1] - radius*Math.sin((Math.PI/2) - theta), "style": "stroke:black;stroke-width:4", "marker-end": "url(#arrowhead)"});
+
+
+
+/* <marker id='head' orient="auto" markerWidth='2' markerHeight='4' refX='0.1' refY='2'>
+    <!-- triangle pointing right (+x) -->
+     <path d='M0,0 V4 L2,2 Z' fill="red"/>
+</marker>
+<path marker-end='url(#head)' fill='none' stroke='black' d='M0,0 C45,45 45,-45 90,0' /> */
+
+/* <svg viewBox="0 0 500 500">
+<circle style="fill:url(#toning);stroke:#010101;" cx="250" cy="250" r="245"> </circle>
+<text x="50%" y="50%" text-anchor="middle" stroke="#51c5cf" stroke-width="2px" dy=".3em">Look, I’m centered!Look, I’m centered!</text>
+</svg> */
+
+/* 
+<line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,0,0);stroke-width:2" />
+<circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+<defs>
+    <marker id="triangle" viewBox="0 0 10 10"
+    refX="1" refY="5" markerUnits="strokeWidth"
+    markerWidth="10" markerHeight="10" orient="auto">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#f00"/>
+    </marker>
+</defs>
+<polyline fill="none" stroke="black" points="20,100 40,60 70,80 100,20" marker-end="url(#triangle)"/>
+*/
+
+
+
+
+
+
+
+STYLES OLD:
+body{
+    margin: 0px;
+    padding: 0px;
+    font-family: Arial, Helvetica, sans-serif;
+    height: 100vh;
+}
+header{
+    width: 100%;
+    background: rgb(40, 57, 76);
+    text-align: center;
+    height: 50px;
+}
+header ul{
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+    padding: 0;
+    margin: 0 auto;
+    /* list-style: none;
+    background-color: rgb(40, 57, 76); 
+    flex-direction: row;
+    align-items: baseline;
+    text-align: center;
+    height: 50px;
+    position: absolute;
+    vertical-align: middle; */
+}
+header ul li{
+    list-style: none;
+    position: relative;
+    padding: 0px;
+    transition: 0.5s;
+    box-sizing: border-box;
+    /* margin: 0;
+    margin: auto;
+    width: 20%; */
+}
+header ul li a{
+    text-decoration: none;
+    padding: 0;
+    margin: 0;
+    color: rgb(71, 182, 160);
+}
+/*header ul li:hover .dropdown{
+    display: block;
+}*/
+.dropdown{
+    position: absolute;
+    top: 45px; /* CHANGE */
+    left: 0px;
+    margin: 0;
+    padding: 0;
+    background: orange;
+    display: block;
+}
+.dropdown:last-child{
+    border-radius: 0 0 4px 4px;
+}
+header ul li:hover{
+    background: green;
+}
+.dropdown li:hover{
+    background-color: antiquewhite;
+    color: orange;
+}
+
+#logo{
+    color: white;
+}
+.content{
+    background-color: orange;
+    margin: 0;
+    padding: 0;
+    top: -500px;
+    height: 250px;
+} 
+
+/*TODO: Adjust height inside dropdown */
+
+
+
+
+
+
+
+
+
+
+/* header ul{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+    background-color: lightseagreen;
+    /* border-radius: 5px; 
+    width: 100%;
+}
+header ul li{ /* Greedy, Dynamic, Sorting, Misc options
+    float: left;
+    width: 20%;
+    height: 50px;
+    line-height: 50px;
+    position: relative;
+}
+header ul li:hover{
+    background-color: pink;
+    /* border-radius: 5px; 
+}
+ul.dropdown{
+    position: absolute;
+    top: 100%;
+    left: 0%;
+    width: 100%;
+    padding: 0;
+}
+ul.dropdown li{
+    background-color: #666;
+    color: black;
+    height: 50px;
+    flex-wrap: wrap;
+}
+ul.dropdown li:hover{
+    background-color: #606060;
+}
+
+ul.dropdown li{
+    display: none;
+}
+li:hover > ul.dropdown li{
+    display: block;
+} */
+
+/* header{
+    background-color: rgb(173, 216, 255);
+    text-align: center;
+    width: 100%;
+}
+header ul{
+    display: inline-block;
+}
+header ul, .shown{
+    margin: 0px;
+    padding: 0px;
+    height: 50px;
+    width: 20%;
+}
+.shown{
+    display: block;
+    flex-direction: column;
+    background-color: rgb(173, 216, 255);
+    border-radius: 3px;
+}
+header ul li{
+    float: left;
+    height: 65px;
+}
+.shown li{
+    height: 100px;
+}
+header ul li, .shown li{
+    list-style-type: none;
+    display: inline-block;
+    margin: auto;
+}
+header ul li a, .shown li a{
+    text-decoration: none;    
+    color: white;
+    transition: color 0.2s ease-out;
+}
+header ul li a:hover, .dropdown li a:hover{ 
+    color: grey;
+}
+
+.triangle{
+    opacity: 35%;
+} */
+
+
+
+
+
+// Gradient attempt:
+<linearGradient id="lightGradient" gradientUnits="userSpaceOnUse">
+    <stop offset = "0" stop-color="blue">
+        <animate attributeName = "offset" values = "0;1" dur = "5s" repeatCount = "indefinite" fill="freeze"></animate>
+    </stop>
+    <stop offset = "0" stop-color="black"></stop>
+</linearGradient>
+
+I tried to do a gradient animation. I scrapped it because:
+    a) With polygons, arrowhead is stretched which looks weird.
+    b) With line, synchronizing line and arrow animations is difficult. The animation is visually "done" way sooner than the onend event triggers.
+    c) Time. Faster to change color than animate it in.
