@@ -235,3 +235,8 @@ I tried to do a gradient animation. I scrapped it because:
     a) With polygons, arrowhead is stretched which looks weird.
     b) With line, synchronizing line and arrow animations is difficult. The animation is visually "done" way sooner than the onend event triggers.
     c) Time. Faster to change color than animate it in.
+
+
+
+console.log(parseFloat(outgoing.getAttribute("x1")) + dx, parseFloat(outgoing.getAttribute("y1")) - dy, parseFloat(outgoing.getAttribute("x2")) + dx, parseFloat(outgoing.getAttribute("y2")) - dy);
+console.log(x1 - dx, y1 + dy, center[0] - dx, center[1] + dy);
