@@ -152,4 +152,15 @@ svg{
     stroke-dashoffset: 0;
     opacity: 1;
 }
+
+.disableSelect{
+    user-select: none;
+    /* -webkit-user-select: none;
+    -ms-user-select: none;
+    -webkit-touch-callout: none;
+    -o-user-select: none;
+    -moz-user-select: none; */
+
+    pointer-events:none;
+}
 /* TODO: Media queries (https://www.youtube.com/watch?v=krZvPvpOHm4&ab_channel=OnlineTutorials) 5:44*/

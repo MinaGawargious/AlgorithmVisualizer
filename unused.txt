@@ -240,3 +240,46 @@ I tried to do a gradient animation. I scrapped it because:
 
 console.log(parseFloat(outgoing.getAttribute("x1")) + dx, parseFloat(outgoing.getAttribute("y1")) - dy, parseFloat(outgoing.getAttribute("x2")) + dx, parseFloat(outgoing.getAttribute("y2")) - dy);
 console.log(x1 - dx, y1 + dy, center[0] - dx, center[1] + dy);
+
+
+
+
+
+
+function dijkstra() {
+    // for (let node in lines){
+    //     for(let line of lines[node]){
+    //         // setAttributes(line, {"stroke": "blue", "marker-end": "url(#arrowheadBlue)"})
+    //     }
+    // }
+}
+
+
+
+//TODO: Move item, recalculate edges.
+    group.addEventListener("mousedown", (event) => {
+        draggedItem = event.target;
+        console.log("MOUSEDOWN");
+    });
+    group.addEventListener("mousemove", (event) => {
+        if(draggedItem && !priorNode){
+            let newX = event.offsetX;
+            let newY = event.offsetY;
+            console.log(`Dragged ${group.childNodes[0].id}`)
+            setAttributes(group, {"x": newX, "y": newY});
+            setAttributes(group.childNodes[0], {"cx": newX, "cy": newY});
+            setAttributes(group.childNodes[1], {"x": newX-0.5, "y": newY+4});
+            // // Move outgoing edges:
+            // for(let outgoing of lines[node.id]){
+            //     if(adjacencyList[outgoing.end].includes(node.id)){ // Incoming edge as well, so endpoints won't be center.
+
+            //     }else{
+            //         setAttributes(outgoing.lineObject, {"x1": newX, "y1": newY});
+            //     }
+            // }
+        }
+    });
+    group.addEventListener("mouseup", (event) => {
+        draggedItem = null;
+        console.log("MOUSEUP");
+    })
