@@ -11,10 +11,10 @@ borderColor = "transparent";
 fillColor = "orange";
 textColor = "white";
 let numNodes = 0;
-let sourceNode = newLine = draggedItem = null;
+let sourceNode = newLine = newWeightText = draggedItem = null;
 
 let adjacencyList = {}; // startID: [endIds]
-let lines = {}; // startID: [{lineObject, gradient}]
+let lines = {}; // startID: [lineObject]
 let func = () => {};
 
 let algorithms = document.querySelectorAll(".dropdown li");
@@ -51,15 +51,29 @@ function getLineProperties(x1, y1, x2, y2){
             dx = -dx;
             dy = -dy;
         }
-        return [x2-dx, y2+dy, "black", "arrowheadBlack_Far"]
+        return [x2-dx, y2+dy, "black", "arrowheadBlack_Far", dx, dy]
     }
-    return [x2, y2, "transparent", "arrowheadBlack_Near"]
+    return [x2, y2, "transparent", "arrowheadBlack_Near", 0, 0]
 }
 
-// Used to shift when we create a double connection and when we drag. (x1, y1) is source point, (x2, y2) is end point.
-function updateDoubleConnection(incoming, outgoing, x1, y1, x2, y2){
+function updateLabelPosition(x1, y1, x2, y2, label){
     let theta = Math.atan((x2-x1)/(y1-y2));
+    let dy = Math.sin(theta); 
+    let dx = Math.cos(theta);
+    if(y2 > y1){
+        dx = -dx;
+        dy = -dy;
+    }
+    let padding = 0.1;
+    let labelWidth = label.getBBox().width, labelHeight = label.getBBox().height;
+    let labelCenter = {"x": (x2+x1)/2 - dx*labelWidth*(0.5+padding), "y": (y2+y1)/2 - dy*labelHeight*(0.5 + padding)};
+    setAttributes(label, {"x": labelCenter.x, "y": labelCenter.y, "text-anchor": "middle", "dominant-baseline": "middle"});
+}
 
+// TODO: MOVE LABELS.
+// Used to shift when we create a double connection and when we drag. (x1, y1) is source point, (x2, y2) is end point.
+function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel, x1, y1, x2, y2){
+    let theta = Math.atan((x2-x1)/(y1-y2));
     let dx = Math.cos(theta); 
     let dy = Math.sin(theta);
     if(y2 > y1){
@@ -67,52 +81,58 @@ function updateDoubleConnection(incoming, outgoing, x1, y1, x2, y2){
         dy = -dy;
     }
     
-    let [incomingX2, incomingY2, incomingArrowheadColor, incomingArrowhead] = getLineProperties(x1, y1, x2, y2);
-    let [outgoingX2, outgoingY2, outgoingArrowheadColor, outgoingArrowhead] = getLineProperties(x2, y2, x1, y1);
+    let incomingX1 = x1 - w*dx, incomingY1 = y1 - w*dy;
+    let [incomingX2, incomingY2, incomingArrowheadColor, incomingArrowhead, incomingXToTip, incomingYToTip] = getLineProperties(x1, y1, x2, y2);
+    incomingX2 -= w*dx;
+    incomingY2 -= w*dy;
 
-    setAttributes(incoming, {"x1": parseFloat(x1) - w*dx, "y1": parseFloat(y1) - w*dy, "x2": parseFloat(incomingX2) - w*dx, "y2": parseFloat(incomingY2) - w*dy, "stroke": incomingArrowheadColor, "marker-end": `url(#${incomingArrowhead})`})
-    setAttributes(outgoing, {"x1": parseFloat(x2) + w*dx, "y1": parseFloat(y2) + w*dy, "x2": parseFloat(outgoingX2) + w*dx, "y2": parseFloat(outgoingY2) + w*dy, "stroke": outgoingArrowheadColor, "marker-end": `url(#${outgoingArrowhead})`})    
+    let outgoingX1 = x2 + w*dx, outgoingY1 = y2 + w*dy;
+    let [outgoingX2, outgoingY2, outgoingArrowheadColor, outgoingArrowhead, outgoingXToTip, outgoingYToTip] = getLineProperties(x2, y2, x1, y1);
+    outgoingX2 += w*dx;
+    outgoingY2 += w*dy;
+
+    setAttributes(incoming, {"x1": incomingX1, "y1": incomingY1, "x2": incomingX2, "y2": incomingY2, "stroke": incomingArrowheadColor, "marker-end": `url(#${incomingArrowhead})`});
+    setAttributes(outgoing, {"x1": outgoingX1, "y1": outgoingY1, "x2": outgoingX2, "y2": outgoingY2, "stroke": outgoingArrowheadColor, "marker-end": `url(#${outgoingArrowhead})`}); 
+
+    updateLabelPosition(incomingX1, incomingY1, incomingX2 + incomingXToTip, incomingY2 - incomingYToTip, incomingLabel);
+    updateLabelPosition(outgoingX1, outgoingY1, outgoingX2 + outgoingXToTip, outgoingY2 - outgoingYToTip, outgoingLabel);
 }
 
-function updateSingleConnection(line, x1, y1, x2, y2){
-    let theta = Math.atan((x2-x1)/(y1-y2));
+function updateSingleConnection(line, label, x1, y1, x2, y2){
+    if(x1 != x2 || y1 != y2){ // Avoid 0/0.
+        let [lineX2, lineY2, lineArrowheadColor, lineArrowhead] = getLineProperties(x1, y1, x2, y2);
+        setAttributes(line, {"x1": x1, "y1": y1, "x2": lineX2, "y2": lineY2, "stroke": lineArrowheadColor, "marker-end": `url(#${lineArrowhead})`})
 
-    let dx = Math.cos(theta); 
-    let dy = Math.sin(theta);
-    if(y2 > y1){
-        dx = -dx;
-        dy = -dy;
+        updateLabelPosition(x1, y1, x2, y2, label);
     }
-    let [lineX2, lineY2, lineArrowheadColor, lineArrowhead] = getLineProperties(x1, y1, x2, y2);
-    setAttributes(line, {"x1": parseFloat(x1), "y1": parseFloat(y1), "x2": parseFloat(lineX2), "y2": parseFloat(lineY2), "stroke": lineArrowheadColor, "marker-end": `url(#${lineArrowhead})`})
 }
 
-// Set incoming (x2, y2) to cursor x and y (account for offset for arrowhead, so go through getLineProperties function). Set outgoing (x1, y1) to cursor x and y and (x2, y2) to account for possible proximity. Update double connections if both incoming and outgoing.
 function updateAllLines(node){
-    // Outgoing + double connection
     let x1 = node.cx.baseVal.value, y1 = node.cy.baseVal.value;
-    // Incoming:
+    // Incoming (override double connection below):
     for(let i = 0; i < Object.keys(adjacencyList).length; i++){
-        console.log(i);
         if(adjacencyList[i].includes(node.id)){
-            let incoming = lines[i][adjacencyList[i].indexOf(node.id)];
+            let incoming = lines[i][adjacencyList[i].indexOf(node.id)].lineObject;
+            let label = lines[i][adjacencyList[i].indexOf(node.id)].label;
             let endNode = svg.getElementById(i);
             let x2 = endNode.cx.baseVal.value, y2 = endNode.cy.baseVal.value;
-            updateSingleConnection(incoming, x2, y2, x1, y1);
+            updateSingleConnection(incoming, label, x2, y2, x1, y1);
         }
     }
     
     for(let i = 0; i < adjacencyList[node.id].length; i++){
         let endNodeId = adjacencyList[node.id][i];
         let endNode = svg.getElementById(endNodeId);
-        let outgoing = lines[node.id][i];
+        let outgoing = lines[node.id][i].lineObject;
+        let outgoingLabel = lines[node.id][i].label;
         let x2 = endNode.cx.baseVal.value, y2 = endNode.cy.baseVal.value;
         // Just outgoing edges.
         if(!adjacencyList[endNodeId].includes(node.id)){
-            updateSingleConnection(outgoing, x1, y1, x2, y2);
+            updateSingleConnection(outgoing, outgoingLabel, x1, y1, x2, y2);
         }else{ // Double connection
-            let incoming = lines[endNodeId][adjacencyList[endNodeId].indexOf(node.id)];
-            updateDoubleConnection(incoming, outgoing, x2, y2, x1, y1);
+            let incoming = lines[endNodeId][adjacencyList[endNodeId].indexOf(node.id)].lineObject;
+            let incomingLabel = lines[endNodeId][adjacencyList[endNodeId].indexOf(node.id)].label;
+            updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel, x2, y2, x1, y1);
         }
     }   
 }
@@ -138,30 +158,34 @@ addButton.addEventListener("click", (event) => {
             sourceNode = node;
             newLine = document.createElementNS(svgns, "line");
             setAttributes(newLine, {"x1": node.cx.baseVal.value, "y1": node.cy.baseVal.value, "x2": node.cx.baseVal.value, "y2": node.cy.baseVal.value, "style": "stroke-width:4",  "marker-end": "url(#arrowheadBlack_Near)", "pointer-events": "none", "stroke": "black"});
+
+            newWeightText = document.createElementNS(svgns, "text");
+            newWeightText.textContent = "1";
+            setAttributes(newWeightText, {"x": node.cx.baseVal.value, "y": node.cy.baseVal.value, "class": "disableSelect"});
             svg.appendChild(newLine);  
+            svg.appendChild(newWeightText);
         }else if(sourceNode != node && !adjacencyList[sourceNode.id].includes(node.id)){ // Second node to establish connection.
             adjacencyList[sourceNode.id].push(node.id);
-
-            let [lineX, lineY, lineStroke, arrowhead] = getLineProperties(sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, node.cx.baseVal.value, node.cy.baseVal.value);
-            setAttributes(newLine, {"x2": lineX, "y2": lineY, "stroke": lineStroke, "marker-end": `url(#${arrowhead})`});
+            lines[sourceNode.id].push({lineObject: newLine, label: newWeightText});
 
             if(adjacencyList[node.id].includes(sourceNode.id)){ // Outgoing edge already exists. Incoming being created.
                 let index = adjacencyList[node.id].indexOf(`${sourceNode.id}`);
-                let outgoing = lines[node.id][index]; // newLine is incoming.
-                updateDoubleConnection(newLine, outgoing, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, node.cx.baseVal.value, node.cy.baseVal.value);
+                let outgoing = lines[node.id][index].lineObject; // newLine is incoming.
+                let outgoingLabel = lines[node.id][index].label;
+                updateDoubleConnection(newLine, outgoing, newWeightText, outgoingLabel, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, node.cx.baseVal.value, node.cy.baseVal.value);
+            }else{
+                updateSingleConnection(newLine, newWeightText, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, node.cx.baseVal.value, node.cy.baseVal.value);
             }
-            lines[sourceNode.id].push(newLine);
-            newLine = sourceNode = null;
+            newLine = sourceNode = newWeightText = null;
         }
     });
 });
 
 svg.addEventListener("mousemove", (event) => {
+    event.preventDefault();
     if(newLine != null){
-        let [lineX, lineY, lineStroke, arrowhead] = getLineProperties(sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, event.offsetX, event.offsetY);
-        setAttributes(newLine, {"x2": lineX, "y2": lineY, "stroke": lineStroke, "marker-end": `url(#${arrowhead})`});
-    }else if(draggedItem != null){
-        event.preventDefault();
+        updateSingleConnection(newLine, newWeightText, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, event.offsetX, event.offsetY);
+    }else if(draggedItem != null && draggedItem.tagName == "circle"){
         setAttributes(draggedItem, {"cx": event.offsetX, "cy": event.offsetY});
         setAttributes(draggedItem.nextElementSibling, {"x": event.offsetX-0.5, "y": event.offsetY+4});
         setAttributes(draggedItem.parentElement, {"x": event.offsetX, "y": event.offsetY});
@@ -181,6 +205,12 @@ document.addEventListener("keydown", (event) => {
         if(newLine != null){
             svg.removeChild(newLine);
         }
-        sourceNode = newLine = null;
+        if(newWeightText != null){
+            svg.removeChild(newWeightText);
+        }
+        sourceNode = newLine = newWeightText = null;
     }
 });
+
+// TODO: Allow weight editing.
+// TODO_IF_TIME: Allow for deleted nodes (delete number 2 of 7, next number is 2, not 8).

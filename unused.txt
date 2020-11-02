@@ -283,3 +283,16 @@ function dijkstra() {
         draggedItem = null;
         console.log("MOUSEUP");
     })
+
+
+
+
+
+
+    
+    // if(c != undefined){
+    //     svg.removeChild(c);
+    // }
+    // c = document.createElementNS(svgns, "rect");
+    // setAttributes(c, {"x": label.getAttribute("x") - labelWidth/2, "y": label.getAttribute("y")-labelHeight/2, "width": labelWidth, "height": labelHeight, "style":"fill:none;stroke:pink;stroke-width:1"});
+    // svg.appendChild(c);

@@ -221,6 +221,3 @@ addButton.addEventListener("click", () => {
     })
 });
 
-// TODO: Add weights and orient label correctly.
-// TODO: Upon running, make transparent gradient for blue.
-// TODO: Allow for deleted nodes (delete number 2 of 7, next number is 2, not 8).
