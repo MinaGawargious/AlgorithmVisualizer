@@ -296,3 +296,12 @@ function dijkstra() {
     // c = document.createElementNS(svgns, "rect");
     // setAttributes(c, {"x": label.getAttribute("x") - labelWidth/2, "y": label.getAttribute("y")-labelHeight/2, "width": labelWidth, "height": labelHeight, "style":"fill:none;stroke:pink;stroke-width:1"});
     // svg.appendChild(c);
+
+
+
+
+
+
+    // 2 options: Have transparent parent rectangle around each text, onclick set fill to not transparent. With this, we could potentially keep the text highlighted and stay in edit mode while dragging since we would update the rectangle position to begin with.
+    //            Add external rectangle (not a parent) around the text on click. This makes it a little harder to stay in edit mode while dragging, but I like this better: no wasted rectangles that are always transparent except upon edit (even then, only one isn't transparent at a time). Furthermore, I don't want to be able to edit and drag at the same time: once you click out the text, we exit edit mode. GO WITH THIS ONE. 
+                
