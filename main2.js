@@ -10,6 +10,8 @@ function setAttributes(element, attributes){
 borderColor = "transparent";
 fillColor = "orange";
 textColor = "white";
+startFillColor = "pink";
+startBorderColor = "transparent";
 let numNodes = 0;
 let sourceNode = newLine = newWeightText = draggedItem = null;
 let selectedRect = document.createElementNS(svgns, "rect");
@@ -17,7 +19,7 @@ setAttributes(selectedRect, {"fill": "none", "stroke": "blue"});
 let selected = null;
 
 let adjacencyList = {}; // startID: [endIds]
-let lines = {}; // startID: [lineObject]
+let lines = {}; // startID: [lineObject, label]
 let func = () => {};
 
 let algorithms = document.querySelectorAll(".dropdown li");
@@ -42,6 +44,18 @@ for (color of ["Black", "Blue"]){
     }
 }
 svg.appendChild(defs);
+
+btn = document.getElementsByClassName("btn")[0];
+btn.onclick = (event) => {
+	event.preventDefault();
+	if (btn.classList.contains("play")) {
+		btn.classList.remove("play");
+		btn.classList.add("pause");
+	} else{
+		btn.classList.remove("pause");
+		btn.classList.add("play");
+	}
+};
 
 // Returns stroke, arrowhead, and end coordinates.
 function getLineProperties(x1, y1, x2, y2){
@@ -139,14 +153,19 @@ addButton.addEventListener("click", (event) => {
     let radius = window.innerWidth/30;
     let group = document.createElementNS(svgns, "g");
     let node = document.createElementNS(svgns, "circle");
-    setAttributes(node, {"r" : radius, "cx" :  Math.random() * svg.width.baseVal.value, "cy": Math.random() * svg.height.baseVal.value, "fill": fillColor, "style": `stroke:${borderColor};stroke-width:4`, "id": numNodes});
+    setAttributes(node, {"r" : radius, "cx" :  Math.random() * window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("height").slice(0, -2), "fill": fillColor, "style": `stroke:${borderColor};stroke-width:4`, "id": numNodes});
+    if(numNodes == 0){
+        node.classList.add("start");
+        setAttributes(node, {"fill": startFillColor, "style": `stroke:${startBorderColor};`})
+    }
 
     let newText = document.createElementNS(svgns, "text");
     setAttributes(newText, {"text-anchor": "middle", "x": parseFloat(node.cx.baseVal.value)-0.5, "y": parseFloat(node.cy.baseVal.value)+4, "font-weight": "bold", "font-size": "16", "fill": textColor, "class": "disableSelect"});
     newText.textContent = numNodes;
     adjacencyList[numNodes] = []
     lines[numNodes++] = []
-    group.append(node, newText);
+    group.appendChild(node);
+    group.appendChild(newText);
     svg.appendChild(group);
 
     group.addEventListener("click", (event) => {
@@ -159,9 +178,10 @@ addButton.addEventListener("click", (event) => {
             newWeightText.textContent = "1";
             newWeightText.addEventListener("click", (event) => {
                 selected = event.target; // We can reference newWeightText when setting fields upon creation because it's not null then. Upon click, however, it is null, so to reference this unique text field again, use event.target.
+                console.log(selected)
                 selected.textContent += "|";
                 
-                setAttributes(selectedRect, {"x": selected.x.baseVal[0].value - selected.getBBox().width/2, "y": selected.y.baseVal[0].value - selected.getBBox().height/2, "width": selected.getBBox().width, "height": selected.getBBox().height});
+                setAttributes(selectedRect, {"x": parseFloat(selected.getAttribute("x")) - selected.getBBox().width/2, "y": parseFloat(selected.getAttribute("y")) - selected.getBBox().height/2, "width": selected.getBBox().width, "height": selected.getBBox().height});
                 svg.appendChild(selectedRect);
                 editLabel(selected);
             })
@@ -203,7 +223,7 @@ function doneEditing(){
         svg.removeChild(selectedRect);
     }
     if(selected != null){
-        selected.textContent = selected.textContent.replaceAll('|', '');
+        selected.textContent = selected.textContent.replace('|', '');
         if(selected.textContent.length == 0){
             selected.textContent = "1";
         }
@@ -236,7 +256,7 @@ function editLabel(label){
         let outgoingEntry = lines[node2Id][adjacencyList[node2Id].indexOf(node1Id)];
         updateDoubleConnection(outgoingEntry.lineObject, incomingEntry.lineObject, outgoingEntry.label, incomingEntry.label, node2.cx.baseVal.value, node2.cy.baseVal.value, node1.cx.baseVal.value, node1.cy.baseVal.value);
     }
-    setAttributes(selectedRect, {"x": selected.x.baseVal[0].value - selected.getBBox().width/2, "y": selected.y.baseVal[0].value - selected.getBBox().height/2, "width": selected.getBBox().width, "height": selected.getBBox().height});
+    setAttributes(selectedRect, {"x": parseFloat(selected.getAttribute("x")) - selected.getBBox().width/2, "y": parseFloat(selected.getAttribute("y")) - selected.getBBox().height/2, "width": selected.getBBox().width, "height": selected.getBBox().height});
 }
 
 document.addEventListener("keydown", (event) => {
@@ -268,4 +288,5 @@ document.addEventListener("keydown", (event) => {
 });
 
 // TODO: Add start and end options.
+// TODO_IF_TIME: Add speed control.
 // TODO_IF_TIME: Allow for deleted nodes (delete number 2 of 7, next number is 2, not 8).

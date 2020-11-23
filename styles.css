@@ -3,6 +3,7 @@
     --play-hover-color: red;
     --header-color: lightblue;
     --header-hover-color: lightgreen;
+    --play-hover-color: pink;
 }
 
 body{
@@ -32,7 +33,7 @@ header ul li{
     box-sizing: border-box;
     border-right: 1px solid rgba(255, 255, 255, 0.2);
 }
-header ul li:hover{
+header ul li:not(#logo):hover{ /* If hover problems arise, remove the :not(#logo) part */
     background: var(--header-hover-color);
 }
 header ul li:last-child{
@@ -87,8 +88,8 @@ svg{
 }
 
 .add {
-    width:50px;
-    height:50px;
+    width:46px;
+    height:46px;
     position: absolute;
     bottom: 10px;
     right: 10px;
@@ -102,8 +103,8 @@ svg{
 }
 .add::before{
     content: "";
-    width:50px;
-    height:50px;
+    width:46px;
+    height:46px;
     bottom: -10px;
     right: -10px;
     position: absolute;
@@ -121,37 +122,44 @@ svg{
     opacity:1;
 }
 
-.circle {
-    stroke: var(--play-hover-color);
-    stroke-dasharray: 200;
-    stroke-dashoffset: 200;
-    transition: all 0.5s ease-in-out;
-    opacity: 0.3;
-}
-.playBut {
-    display: inline-block;
-    width:50px;
-    height:50px;
+.btn {
     position: absolute;
     bottom: 70px;
     right: 10px;
-    transition: all 0.5s ease;
+    width: 40px;
+    height: 40px;
+    border: black 3px solid;
+    border-radius: 50%;
+    transition: border 0.2s ease-in-out;
 }
-.playBut .triangle {
-    transition: all 0.7s ease-in-out;
-    stroke-dasharray: 240;
-    stroke-dashoffset: 480;
-    stroke: #000;
-    transform: translateY(0);
+.btn:hover {
+    border: var(--play-hover-color) 3px solid;
 }
-.playBut:hover .triangle {
-    stroke-dashoffset: 0;
-    opacity: 1;
-    stroke: var(--play-hover-color);
+.btn:hover .bar {
+    background-color: var(--play-hover-color);
 }
-.playBut:hover .circle {
-    stroke-dashoffset: 0;
-    opacity: 1;
+.btn .bar {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    width: 3px;
+    height: 20px;
+    border-radius: 3px;
+    background-color: black;
+    transform-origin: center;
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+.btn.pause .bar-1 {
+    transform: translateX(13.5px) translateY(0px) rotate(0deg);
+}
+.btn.pause .bar-2 {
+    transform: translateX(24px) translateY(0px) rotate(0deg);
+}
+.btn.play .bar-1 {
+    transform: translateX(20px) translateY(-5px) rotate(-55deg);
+}
+.btn.play .bar-2 {
+    transform: translateX(20px) translateY(5px) rotate(-125deg);
 }
 
 .disableSelect{

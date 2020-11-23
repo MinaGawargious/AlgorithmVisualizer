@@ -3,49 +3,38 @@
 <head>
     <title>Algorithm Visualizer</title>
     <link rel="stylesheet" href="styles.css">
-    <meta name="viewport" content="width=device-width,intial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" charset="utf-8">
 </head>
 <body>
     <header>
         <ul>
+            <li><a href="#">DFS</a></li>
+            <li><a href="#">BFS</a></li>
             <li id="logo">Algorithm Visualizer</li>
-            <li>
-                <a href="#">Greedy</a>
-                <ul class="dropdown">
-                    <li class="dijkstra"><a href="#">Dijkstra</a></li>
-                    <li class="prim"><a href="#">MST (Prim)</a></li>
-                    <li class="kruskal"><a href="#">MST (Kruskal)</a></li>
-                </ul>
-            </li>
-            <li>
-                <a href="#">Dynamic</a>
-                <ul class="dropdown">
-                    <li class="knapsack"><a href="#">Knapsack</a></li>
-                    <li class="bellmondFord"><a href="#">Bellmond Ford</a></li>
-                </ul>
-            </li>
-            <li>
-                <a href="#">Sorting</a>
-                <!-- TODO: Sorting Algorithms -->
-            </li>
-            <li>
-                <a href="#">Miscillaneous</a>
-                <ul class="dropdown">
-                    <li class="galeShapley"><a href="#">Stable Marriage</a></li>
-                    <li class="fordFulkerson"><a href="#">Ford Fulkerson</a></li>
-                </ul>
-            </li>
+            <li><a href="#">Dijkstra</a></li>
+            <li><a href="#">Bellman-Ford</a></li>
         </ul>
     </header>
     <section class="content">
         <svg></svg>
-        <div class="playBut" onclick="func()">
+        <!-- <div class="playBut" onclick="func()">
             <svg>
-                <polygon class='triangle' fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="16,13 40,25 16,37"/> 
+                <polygon class='triangle play' fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="16,13 40,25 16,37"/> 
                 <circle class='circle' fill="none"  stroke-width="4" stroke-linecap="round" stroke-linejoin="round" cx="25px" cy="25px" r="23px"/>
             </svg>   
+        </div> -->
+        <form > <!-- onsubmit="CALL FUNCTION HERE IF WE WANT"> -->
+            <label for="startField">Start:</label>
+            <input type="text" name="startField" id="startField">
+        </form>
+        <div class="btn play">
+            <span class="bar bar-1"></span>
+            <span class="bar bar-2"></span>			
         </div>
-        <div class="add"></div>
+        <div class="add">
+            <!-- <span class="addbar-1"></span> -->
+            <!-- <span class="addbar-2"></span> -->
+        </div>
     </section>
 </body>
 <script src="main2.js"></script>
