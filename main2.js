@@ -17,6 +17,7 @@ let sourceNode = newLine = newWeightText = draggedItem = null;
 let selectedRect = document.createElementNS(svgns, "rect");
 setAttributes(selectedRect, {"fill": "none", "stroke": "blue"});
 let selected = null;
+let weighted = true, directed = true;
 
 let adjacencyList = {}; // startID: [endIds]
 let lines = {}; // startID: [lineObject, label]
@@ -48,7 +49,7 @@ svg.appendChild(defs);
 btn = document.getElementsByClassName("btn")[0];
 btn.onclick = (event) => {
 	event.preventDefault();
-	if (btn.classList.contains("play")) {
+	if(btn.classList.contains("play")) {
 		btn.classList.remove("play");
 		btn.classList.add("pause");
 	} else{
@@ -56,6 +57,29 @@ btn.onclick = (event) => {
 		btn.classList.add("play");
 	}
 };
+
+function isNumber(evt) {
+	var charCode = evt.keyCode;
+	return ( (charCode <= 31) || (charCode >= 48 && charCode <= 57) )
+}
+form = document.getElementsByTagName("form")[0];
+start = form.getElementsByTagName("input")[0];
+end = form.getElementsByTagName("input")[1];
+form.onpaste = event => event.preventDefault();
+
+form.onsubmit = (event) => {
+	event.preventDefault();
+	start.value = "hi"
+	console.log(form)
+}
+// Color correct start node as selected.
+start.oninput = (event) => {
+    // console.log("changed");
+}
+// Color correct end node as selected.
+end.oninput = (event) => {
+
+}
 
 // Returns stroke, arrowhead, and end coordinates.
 function getLineProperties(x1, y1, x2, y2){
@@ -147,15 +171,40 @@ function updateAllLines(node){
     }   
 }
 
+function makeWeightsVisible(){
+    for(let i in lines){
+        for(let j in lines[i]){
+            setAttributes(lines[i][j].label, {"pointer-events": "auto", "opacity": 1});
+        }
+    }
+}
+
+function makeWeightsInvisible(){
+    for(let i in lines){
+        for(let j in lines[i]){
+            setAttributes(lines[i][j].label, {"pointer-events": "none", "opacity": 0});
+        }
+    }
+}
+
 let addButton = document.getElementsByClassName("add")[0];
 addButton.addEventListener("click", (event) => {
+    weighted = !weighted;
+    if(weighted){
+        // addAllWeights();
+        makeWeightsVisible();
+    }else{
+        // removeAllWeights();
+        makeWeightsInvisible();
+    }
+
     // Create new node.
     let radius = window.innerWidth/30;
     let group = document.createElementNS(svgns, "g");
     let node = document.createElementNS(svgns, "circle");
     setAttributes(node, {"r" : radius, "cx" :  Math.random() * window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("height").slice(0, -2), "fill": fillColor, "style": `stroke:${borderColor};stroke-width:4`, "id": numNodes});
     if(numNodes == 0){
-        node.classList.add("start");
+        node.classList.add("startNode");
         setAttributes(node, {"fill": startFillColor, "style": `stroke:${startBorderColor};`})
     }
 
@@ -185,9 +234,17 @@ addButton.addEventListener("click", (event) => {
                 svg.appendChild(selectedRect);
                 editLabel(selected);
             })
+
+            // LABELS MUST BE IN MEMORY AT ALL TIMES IN ORDER TO RESTORE AT CORRECT SPOT AND WEIGHTS WHEN GOING TO A WEIGHTED ALGORITHM. 
             setAttributes(newWeightText, {"x": node.cx.baseVal.value, "y": node.cy.baseVal.value});
             svg.appendChild(newLine);  
+            // There are two ways to add weight options. The first: remove labels from the HTML entirely. The second: simply make them invisible by setting opacity to 0. The first option also requires looping through all nodes as well to adjust label positions, and proved to be MUCH slower in dense graphs. So, the opacity option is better.
+            // if(weighted){
             svg.appendChild(newWeightText);
+            // }
+            if(!weighted){
+                setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
+            }
         }else if(sourceNode != node && !adjacencyList[sourceNode.id].includes(node.id)){ // Second node to establish connection.
             adjacencyList[sourceNode.id].push(node.id);
             lines[sourceNode.id].push({lineObject: newLine, label: newWeightText});
@@ -268,25 +325,25 @@ document.addEventListener("keydown", (event) => {
         }
         doneEditing();
         sourceNode = newLine = newWeightText = null;
-    }else if (selected != null){
+    }else if(selected != null){
         // SVG text do not allow editing like input fields do, so I have to mimic it myself with the pipe character as the cursor.
         let cursorIndex = selected.textContent.indexOf("|");
         if(event.key == "ArrowLeft" && cursorIndex != 0){ // Move left.
             selected.textContent = selected.textContent.replace("|","");
             selected.textContent = selected.textContent.slice(0, cursorIndex - 1) + "|" + selected.textContent.slice(cursorIndex-1);
-        }else if (event.key == "ArrowRight" && cursorIndex != selected.textContent.length-1){
+        }else if(event.key == "ArrowRight" && cursorIndex != selected.textContent.length-1){
             selected.textContent = selected.textContent.replace("|","");
             selected.textContent = selected.textContent.slice(0, cursorIndex + 1) + "|" + selected.textContent.slice(cursorIndex+1);
         }else if(event.key == "Backspace" || event.key == "Delete" && cursorIndex > 0){
             selected.textContent = selected.textContent.slice(0, cursorIndex-1) + selected.textContent.slice(cursorIndex);
             editLabel(selected);
-        }else if (isFinite(event.key) && selected.textContent.length < 6){ // 0 - 9
+        }else if(isFinite(event.key) && selected.textContent.length < 6){ // 0 - 9
             selected.textContent = selected.textContent.slice(0, cursorIndex) + event.key + selected.textContent.slice(cursorIndex);
             editLabel(selected);
         }
     }
 });
 
-// TODO: Add start and end options.
+// TODO: Add undirected option.
 // TODO_IF_TIME: Add speed control.
 // TODO_IF_TIME: Allow for deleted nodes (delete number 2 of 7, next number is 2, not 8).

@@ -580,3 +580,39 @@ OLD PLAY BUTTON CSS
 
 END OLD PLAY BUTTON CSS
 
+OLD PLAY BUTTON HTML
+
+<!-- <div class="playBut" onclick="func()">
+    <svg>
+        <polygon class='triangle play' fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="16,13 40,25 16,37"/> 
+        <circle class='circle' fill="none"  stroke-width="4" stroke-linecap="round" stroke-linejoin="round" cx="25px" cy="25px" r="23px"/>
+    </svg>   
+</div> -->
+
+END OLF PLAY BUTTON HTML
+
+
+CODE USED TO REMOVE WEIGHTS FROM HTML ENTIRELY IF UNWEIGHTED, AND ADD THEM BACK IN IF WEIGHTED:
+
+function addAllWeights(){
+    // Show all weights.
+    for(let i in lines){
+        for(let j in lines[i]){
+            svg.appendChild(lines[i][j].label);
+        }
+    }
+    for(let node of svg.getElementsByTagNameNS(svgns, "circle")){
+        updateAllLines(node);
+    }
+}
+
+function removeAllWeights(){
+    // Unshow all weights.
+    for(let i in lines){
+        for(let j in lines[i]){
+            if(svg.contains(lines[i][j].label)){
+                svg.removeChild(lines[i][j].label);
+            }
+        }
+    }
+}
