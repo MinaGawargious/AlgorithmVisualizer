@@ -79,7 +79,8 @@ header ul li ul li a{
     /* background: orange; */
     margin: auto;
     padding: auto;
-    width: 100%;    
+    width: 100%; 
+    height: 100%;
     flex: 1;
 }
 svg{

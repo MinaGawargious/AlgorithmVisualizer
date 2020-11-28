@@ -74,11 +74,24 @@ form.onsubmit = (event) => {
 }
 // Color correct start node as selected.
 start.oninput = (event) => {
-    // console.log("changed");
+    // console.log("start changed");
+    directed = !directed;
+    for(let node of svg.getElementsByTagNameNS(svgns, "circle")){
+        updateAllLines(node);
+    }
+    console.log((directed ? "" : "un") + "directed");
 }
 // Color correct end node as selected.
 end.oninput = (event) => {
-
+    weighted = !weighted;
+    if(weighted){
+        // addAllWeights();
+        makeWeightsVisible();
+    }else{
+        // removeAllWeights();
+        makeWeightsInvisible();
+    }
+    console.log((weighted ? "" : "un") + "weighted");
 }
 
 // Returns stroke, arrowhead, and end coordinates.
@@ -112,7 +125,7 @@ function updateLabelPosition(x1, y1, x2, y2, label){
 }
 
 // Used to shift when we create a double connection and when we drag. (x1, y1) is source point, (x2, y2) is end point.
-function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel, x1, y1, x2, y2){
+function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel, x1, y1, x2, y2, id1, id2){
     let theta = Math.atan((x2-x1)/(y1-y2));
     let dx = Math.cos(theta); 
     let dy = Math.sin(theta);
@@ -120,13 +133,25 @@ function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel
         dx = -dx;
         dy = -dy;
     }
-    
-    let [incomingX2, incomingY2, incomingArrowheadColor, incomingArrowhead] = getLineProperties(x1, y1, x2, y2);
+    console.log("UPDATEDOUBLE: ", id1, id2);
+// TODO: Remove a label to only have one when undirected, 2 when directed.
+    if(directed){
+        let [incomingX2, incomingY2, incomingArrowheadColor, incomingArrowhead] = getLineProperties(x1, y1, x2, y2);
+        let [outgoingX2, outgoingY2, outgoingArrowheadColor, outgoingArrowhead] = getLineProperties(x2, y2, x1, y1);
 
-    let [outgoingX2, outgoingY2, outgoingArrowheadColor, outgoingArrowhead] = getLineProperties(x2, y2, x1, y1);
+        setAttributes(incoming, {"x1": x1 - w*dx, "y1": y1 - w*dy, "x2": incomingX2 - w*dx, "y2": incomingY2 - w*dy, "stroke": incomingArrowheadColor, "marker-end": `url(#${incomingArrowhead})`});
+        setAttributes(outgoing, {"x1": x2 + w*dx, "y1": y2 + w*dy, "x2": outgoingX2 + w*dx, "y2": outgoingY2 + w*dy, "stroke": outgoingArrowheadColor, "marker-end": `url(#${outgoingArrowhead})`});
 
-    setAttributes(incoming, {"x1": x1 - w*dx, "y1": y1 - w*dy, "x2": incomingX2 - w*dx, "y2": incomingY2 - w*dy, "stroke": incomingArrowheadColor, "marker-end": `url(#${incomingArrowhead})`});
-    setAttributes(outgoing, {"x1": x2 + w*dx, "y1": y2 + w*dy, "x2": outgoingX2 + w*dx, "y2": outgoingY2 + w*dy, "stroke": outgoingArrowheadColor, "marker-end": `url(#${outgoingArrowhead})`}); 
+        setAttributes(incomingLabel, {"pointer-events": "auto", "opacity": 1});
+        setAttributes(outgoingLabel, {"pointer-events": "auto", "opacity": 1});
+    }else{
+        setAttributes(incoming, {"x1": x1, "y1": y1, "x2": x2, "y2": y2, "stroke": "black"});
+        setAttributes(outgoing, {"x1": x2, "y1": y2, "x2": x1, "y2": y1, "stroke": "black"});
+        incoming.removeAttribute("marker-end");
+        outgoing.removeAttribute("marker-end");
+        let labelToRemove = id1 < id2 ? incomingLabel : outgoingLabel;
+        setAttributes(labelToRemove, {"pointer-events": "none", "opacity": 0});
+    }
 
     updateLabelPosition(x1 - w*dx, y1 - w*dy, x2 - w*dx, y2 - w*dy, incomingLabel);
     updateLabelPosition(x2 + w*dx, y2 + w*dy, x1 + w*dx, y1 + w*dy, outgoingLabel);
@@ -135,8 +160,12 @@ function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel
 function updateSingleConnection(line, label, x1, y1, x2, y2){
     if(x1 != x2 || y1 != y2){ // Avoid 0/0.
         let [lineX2, lineY2, lineArrowheadColor, lineArrowhead] = getLineProperties(x1, y1, x2, y2);
-        setAttributes(line, {"x1": x1, "y1": y1, "x2": lineX2, "y2": lineY2, "stroke": lineArrowheadColor, "marker-end": `url(#${lineArrowhead})`})
-
+        setAttributes(line, {"x1": x1, "y1": y1, "x2": directed ? lineX2: x2, "y2": directed ? lineY2: y2, "stroke": directed ? lineArrowheadColor : "black"});
+        if(directed){
+            setAttributes(line, {"marker-end": `url(#${lineArrowhead})`});
+        }else{
+            line.removeAttribute("marker-end");
+        }
         updateLabelPosition(x1, y1, x2, y2, label);
     }
 }
@@ -166,7 +195,7 @@ function updateAllLines(node){
         }else{ // Double connection
             let incoming = lines[endNodeId][adjacencyList[endNodeId].indexOf(node.id)].lineObject;
             let incomingLabel = lines[endNodeId][adjacencyList[endNodeId].indexOf(node.id)].label;
-            updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel, x2, y2, x1, y1);
+            updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel, x2, y2, x1, y1, endNodeId, node.id);
         }
     }   
 }
@@ -189,15 +218,6 @@ function makeWeightsInvisible(){
 
 let addButton = document.getElementsByClassName("add")[0];
 addButton.addEventListener("click", (event) => {
-    weighted = !weighted;
-    if(weighted){
-        // addAllWeights();
-        makeWeightsVisible();
-    }else{
-        // removeAllWeights();
-        makeWeightsInvisible();
-    }
-
     // Create new node.
     let radius = window.innerWidth/30;
     let group = document.createElementNS(svgns, "g");
@@ -221,7 +241,10 @@ addButton.addEventListener("click", (event) => {
         if(sourceNode == null){
             sourceNode = node;
             newLine = document.createElementNS(svgns, "line");
-            setAttributes(newLine, {"x1": node.cx.baseVal.value, "y1": node.cy.baseVal.value, "x2": node.cx.baseVal.value, "y2": node.cy.baseVal.value, "style": "stroke-width:4",  "marker-end": "url(#arrowheadBlack_Near)", "pointer-events": "none", "stroke": "black"});
+            setAttributes(newLine, {"x1": node.cx.baseVal.value, "y1": node.cy.baseVal.value, "x2": node.cx.baseVal.value, "y2": node.cy.baseVal.value, "style": "stroke-width:4", "pointer-events": "none", "stroke": "black"});
+            if(directed){
+                setAttributes(newLine, {"marker-end": "url(#arrowheadBlack_Near)"});
+            }
 
             newWeightText = document.createElementNS(svgns, "text");
             newWeightText.textContent = "1";
@@ -245,16 +268,16 @@ addButton.addEventListener("click", (event) => {
             if(!weighted){
                 setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
             }
-        }else if(sourceNode != node && !adjacencyList[sourceNode.id].includes(node.id)){ // Second node to establish connection.
+        }else if(sourceNode != node && !adjacencyList[sourceNode.id].includes(node.id) && (directed || !adjacencyList[node.id].includes(sourceNode.id))){ // Second node to establish connection. Make sure we don't make an edge to ourselves or a duplicate edge. Also only allow edge in undirected graph if no edge between these two nodes exists.
             adjacencyList[sourceNode.id].push(node.id);
             lines[sourceNode.id].push({lineObject: newLine, label: newWeightText});
             setAttributes(newWeightText, {"node1": sourceNode.id, "node2": node.id});
 
-            if(adjacencyList[node.id].includes(sourceNode.id)){ // Outgoing edge already exists. Incoming being created.
+            if(adjacencyList[node.id].includes(sourceNode.id) && directed){ // Outgoing edge already exists. Incoming being created.
                 let index = adjacencyList[node.id].indexOf(`${sourceNode.id}`);
                 let outgoing = lines[node.id][index].lineObject; // newLine is incoming.
                 let outgoingLabel = lines[node.id][index].label;
-                updateDoubleConnection(newLine, outgoing, newWeightText, outgoingLabel, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, node.cx.baseVal.value, node.cy.baseVal.value);
+                updateDoubleConnection(newLine, outgoing, newWeightText, outgoingLabel, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, node.cx.baseVal.value, node.cy.baseVal.value, sourceNode.id, node.id);
             }else{
                 updateSingleConnection(newLine, newWeightText, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, node.cx.baseVal.value, node.cy.baseVal.value);
             }
@@ -311,7 +334,7 @@ function editLabel(label){
         updateSingleConnection(incomingEntry.lineObject, incomingEntry.label, node1.cx.baseVal.value, node1.cy.baseVal.value, node2.cx.baseVal.value, node2.cy.baseVal.value);
     }else{ // Double connection.
         let outgoingEntry = lines[node2Id][adjacencyList[node2Id].indexOf(node1Id)];
-        updateDoubleConnection(outgoingEntry.lineObject, incomingEntry.lineObject, outgoingEntry.label, incomingEntry.label, node2.cx.baseVal.value, node2.cy.baseVal.value, node1.cx.baseVal.value, node1.cy.baseVal.value);
+        updateDoubleConnection(outgoingEntry.lineObject, incomingEntry.lineObject, outgoingEntry.label, incomingEntry.label, node2.cx.baseVal.value, node2.cy.baseVal.value, node1.cx.baseVal.value, node1.cy.baseVal.value, node2Id, node1Id);
     }
     setAttributes(selectedRect, {"x": parseFloat(selected.getAttribute("x")) - selected.getBBox().width/2, "y": parseFloat(selected.getAttribute("y")) - selected.getBBox().height/2, "width": selected.getBBox().width, "height": selected.getBBox().height});
 }
@@ -344,6 +367,22 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
-// TODO: Add undirected option.
+
+function BFS(){
+
+}
+
+function DFS(){
+
+}
+
+function Dijkstra(){
+
+}
+
+function Bellman_Ford(){
+    
+}
+
 // TODO_IF_TIME: Add speed control.
 // TODO_IF_TIME: Allow for deleted nodes (delete number 2 of 7, next number is 2, not 8).
