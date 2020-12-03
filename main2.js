@@ -7,11 +7,7 @@ function setAttributes(element, attributes){
     }
 } 
 
-borderColor = "transparent";
-fillColor = "orange";
 textColor = "white";
-startFillColor = "pink";
-startBorderColor = "transparent";
 let numNodes = 0;
 let sourceNode = newLine = newWeightText = draggedItem = null;
 let selectedRect = document.createElementNS(svgns, "rect");
@@ -23,10 +19,12 @@ let adjacencyList = {}; // startID: [endIds]
 let lines = {}; // startID: [lineObject, label]
 let func = () => {};
 
-let algorithms = document.querySelectorAll(".dropdown li");
+let algorithms = document.querySelectorAll(".algorithm");
 for(let algorithm of algorithms){
     algorithm.addEventListener("click", () => {
-        func = window[algorithm.classList[0]]
+        func = window[algorithm.classList[0]];
+        setWeighted(algorithm.getAttribute("weighted") == "true");
+        setDirected(algorithm.getAttribute("directed") == "true");
     });
 }
 
@@ -51,7 +49,8 @@ btn.onclick = (event) => {
 	event.preventDefault();
 	if(btn.classList.contains("play")) {
 		btn.classList.remove("play");
-		btn.classList.add("pause");
+        btn.classList.add("pause");
+        func();
 	} else{
 		btn.classList.remove("pause");
 		btn.classList.add("play");
@@ -64,34 +63,18 @@ function isNumber(evt) {
 }
 form = document.getElementsByTagName("form")[0];
 start = form.getElementsByTagName("input")[0];
-end = form.getElementsByTagName("input")[1];
 form.onpaste = event => event.preventDefault();
 
 form.onsubmit = (event) => {
-	event.preventDefault();
-	start.value = "hi"
-	console.log(form)
+    event.preventDefault();
+    if(start.value <= numNodes){
+        document.getElementsByClassName("startNode")[0].classList.remove("startNode");
+        document.getElementById(start.value).classList.add("startNode");
+    }
 }
 // Color correct start node as selected.
-start.oninput = (event) => {
-    // console.log("start changed");
-    directed = !directed;
-    for(let node of svg.getElementsByTagNameNS(svgns, "circle")){
-        updateAllLines(node);
-    }
-    console.log((directed ? "" : "un") + "directed");
-}
-// Color correct end node as selected.
-end.oninput = (event) => {
-    weighted = !weighted;
-    if(weighted){
-        // addAllWeights();
-        makeWeightsVisible();
-    }else{
-        // removeAllWeights();
-        makeWeightsInvisible();
-    }
-    console.log((weighted ? "" : "un") + "weighted");
+start.onsubmit = (event) => {
+    
 }
 
 // Returns stroke, arrowhead, and end coordinates.
@@ -133,8 +116,6 @@ function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel
         dx = -dx;
         dy = -dy;
     }
-    console.log("UPDATEDOUBLE: ", id1, id2);
-// TODO: Remove a label to only have one when undirected, 2 when directed.
     if(directed){
         let [incomingX2, incomingY2, incomingArrowheadColor, incomingArrowhead] = getLineProperties(x1, y1, x2, y2);
         let [outgoingX2, outgoingY2, outgoingArrowheadColor, outgoingArrowhead] = getLineProperties(x2, y2, x1, y1);
@@ -214,6 +195,34 @@ function makeWeightsInvisible(){
             setAttributes(lines[i][j].label, {"pointer-events": "none", "opacity": 0});
         }
     }
+    if(newWeightText != null){
+        setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
+    }
+}
+
+function setWeighted(newWeight){
+    if(weighted != newWeight){
+        weighted = newWeight;
+        if(weighted){
+            // addAllWeights();
+            makeWeightsVisible();
+        }else{
+            // removeAllWeights();
+            makeWeightsInvisible();
+        }
+        console.log((weighted ? "" : "un") + "weighted");
+    }
+}
+
+function setDirected(newDirected){
+    if(directed != newDirected){
+        console.log("CHANGING")
+        directed = newDirected;
+        for(let node of svg.getElementsByTagNameNS(svgns, "circle")){
+            updateAllLines(node);
+        }
+        console.log((directed ? "" : "un") + "directed");
+    }
 }
 
 let addButton = document.getElementsByClassName("add")[0];
@@ -222,10 +231,10 @@ addButton.addEventListener("click", (event) => {
     let radius = window.innerWidth/30;
     let group = document.createElementNS(svgns, "g");
     let node = document.createElementNS(svgns, "circle");
-    setAttributes(node, {"r" : radius, "cx" :  Math.random() * window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("height").slice(0, -2), "fill": fillColor, "style": `stroke:${borderColor};stroke-width:4`, "id": numNodes});
+    setAttributes(node, {"r" : radius, "cx" :  Math.random() * window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("height").slice(0, -2), "style": "stroke-width:4", "id": numNodes});
+    node.classList.add("node");
     if(numNodes == 0){
         node.classList.add("startNode");
-        setAttributes(node, {"fill": startFillColor, "style": `stroke:${startBorderColor};`})
     }
 
     let newText = document.createElementNS(svgns, "text");
@@ -367,11 +376,11 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
-
 function BFS(){
 
 }
 
+// Unweighted. Directed or undirected. Focus on directed only for now, and we can add the option for an algorithm to be either directed or undirected later.
 function DFS(){
 
 }
@@ -381,8 +390,5 @@ function Dijkstra(){
 }
 
 function Bellman_Ford(){
-    
-}
 
-// TODO_IF_TIME: Add speed control.
-// TODO_IF_TIME: Allow for deleted nodes (delete number 2 of 7, next number is 2, not 8).
+}

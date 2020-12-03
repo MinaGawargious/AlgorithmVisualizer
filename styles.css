@@ -4,6 +4,12 @@
     --header-color: lightblue;
     --header-hover-color: lightgreen;
     --play-hover-color: pink;
+    --borderColor : transparent;
+    --fillColor : orange;
+    --startFillColor : pink;
+    --startBorderColor : transparent;
+    /* --startFillColor: pink; */
+    /* --startBorderColor: transparent; */
 }
 
 body{
@@ -167,14 +173,24 @@ svg{
 form{
     position: absolute;
     bottom: 130px;
-    right: 2px;
+    right: 10px;
 }
 input{
-    width: 27px;
+    width: 45px;
     text-align: center;
 }
 label{
     border-left: 0ch;
+}
+
+.node{
+    fill: var(--fillColor);
+    stroke: var(--borderColor);
+}
+
+.startNode{
+    fill: var(--startFillColor);
+    stroke: var(--startBorderColor);
 }
 
 .disableSelect{
