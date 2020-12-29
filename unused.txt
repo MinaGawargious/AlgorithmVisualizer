@@ -1,4 +1,3 @@
-
 // node.setAttributeNS(null, "draggable", "true");
 // node.addEventListener("dragstart", (event) => {
     //     event.dataTransfer.dropEffect = "move";
@@ -615,4 +614,47 @@ function removeAllWeights(){
             }
         }
     }
+}
+
+
+// FIRST DFS ATTEMPT:
+let fulfilled = [];
+async function DFS(node){
+    let waitingFor = [];
+    discovered.push(node.id);
+    node.classList.add("currentNode");
+    node.classList.add("discoveredNode");
+    await sleep(delay);
+    for (let neighbor of adjacencyList[node.id]){
+        node.classList.remove("currentNode");
+        await sleep(delay);
+        let edge = lines[node.id][adjacencyList[node.id].indexOf(neighbor)].lineObject;
+        setAttributes(edge, {"stroke" : "green"});
+        await sleep(delay);
+        if(!discovered.includes(neighbor)){
+            DFS(document.getElementById(neighbor));
+            waitingFor.push(parseInt(neighbor))
+        }
+        setAttributes(edge, {"stroke" : "red"}); 
+        await sleep(delay);
+        if(neighbor != adjacencyList[node.id][adjacencyList[node.id].length-1]){
+            node.classList.add("currentNode");
+        }
+        await sleep(delay);
+    }
+    // Wait for other DFS calls to finish before marking as finished.
+    // Have array of all nodes I need to wait on. Then Promise.all() wait for them to finish. Upon finsihing a node, resolve my node.id promise.
+    console.log(node.id + " is waiting for ", waitingFor)
+    for(let i = 0; i < waitingFor.length; i++){
+        Promise.retry(() => new Promise((resolve, reject) => {
+            if(fulfilled[waitingFor[i]]){
+                resolve();
+            }else{
+                reject();
+            }
+        }, delay))
+    }
+    node.classList.remove("currentNode");
+    node.classList.add("finishedNode");
+    fulfilled[node.id] = true;
 }

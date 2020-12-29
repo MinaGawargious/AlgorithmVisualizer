@@ -1,34 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Algorithm Visualizer</title>
-    <link rel="stylesheet" href="styles.css">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" charset="utf-8">
+   <title>Algorithm Visualizer</title>
+   <link rel="stylesheet" href="styles.css">
+   <meta name="viewport" content="width=device-width,initial-scale=1.0" charset="utf-8">
 </head>
 <body>
-    <header>
-        <ul>
-            <li><a href="#" class="DFS algorithm" weighted="false" directed="true">DFS</a></li>
-            <li><a href="#" class="BFS algorithm">BFS</a></li>
-            <li id="logo">Algorithm Visualizer</li>
-            <li><a href="#" class="Dijkstra algorithm">Dijkstra</a></li>
-            <li><a href="#" class="Bellman_Ford algorithm">Bellman-Ford</a></li>
-        </ul>
-    </header>
-    <section class="content">
-        <svg></svg>
-        <form onkeypress="return isNumber(event)">
-            <input type="text" name="startField" id="startField" pattern= "^[0-9]*$" maxlength="3" placeholder="start"><!-- <label>-</label><input type="text" name="endField" id="endField" pattern= "^[0-9]*$" maxlength="3" placeholder="to"> -->
-        </form>
-        <div class="btn play">
-            <span class="bar bar-1"></span>
-            <span class="bar bar-2"></span>			
-        </div>
-        <div class="add">
-            <!-- <span class="addbar-1"></span> -->
-            <!-- <span class="addbar-2"></span> -->
-        </div>
-    </section>
+   <header>
+       <ul>
+           <li><a href="#" class="DFS algorithm" weighted="false" directed="true">DFS</a></li>
+           <li><a href="#" class="BFS algorithm">BFS</a></li>
+           <li id="logo">Graph Visualizer</li>
+           <li><a href="#" class="Dijkstra algorithm">Dijkstra</a></li>
+           <li><a href="#" class="Bellman_Ford algorithm">Bellman-Ford</a></li>
+       </ul>
+   </header>
+   <section class="content">
+       <svg></svg>
+       <form onkeypress="return isNumber(event)">
+           <input type="text" name="startField" id="startField" pattern= "^[0-9]*$" maxlength="3" placeholder="start">
+       </form>
+       <div class="btn play">
+           <span class="bar bar-1"></span>
+           <span class="bar bar-2"></span>        
+       </div>
+       <div class="add">
+           <!-- <span class="addbar-1"></span> -->
+           <!-- <span class="addbar-2"></span> -->
+       </div>
+   </section>
 </body>
 <script src="main2.js"></script>
 </html>
