@@ -8,17 +8,17 @@
 <body>
     <header>
         <ul>
-            <li><a href="#">DFS</a></li>
-            <li><a href="#">BFS</a></li>
+            <li><a href="#" class="DFS algorithm" weighted="false" directed="true">DFS</a></li>
+            <li><a href="#" class="BFS algorithm">BFS</a></li>
             <li id="logo">Algorithm Visualizer</li>
-            <li><a href="#">Dijkstra</a></li>
-            <li><a href="#">Bellman-Ford</a></li>
+            <li><a href="#" class="Dijkstra algorithm">Dijkstra</a></li>
+            <li><a href="#" class="Bellman_Ford algorithm">Bellman-Ford</a></li>
         </ul>
     </header>
     <section class="content">
         <svg></svg>
         <form onkeypress="return isNumber(event)">
-            <input type="text" name="startField" id="startField" pattern= "^[0-9]*$" maxlength="3" placeholder="from"><label>-</label><input type="text" name="endField" id="endField" pattern= "^[0-9]*$" maxlength="3" placeholder="to">
+            <input type="text" name="startField" id="startField" pattern= "^[0-9]*$" maxlength="3" placeholder="start"><!-- <label>-</label><input type="text" name="endField" id="endField" pattern= "^[0-9]*$" maxlength="3" placeholder="to"> -->
         </form>
         <div class="btn play">
             <span class="bar bar-1"></span>

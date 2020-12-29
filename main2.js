@@ -57,10 +57,6 @@ btn.onclick = (event) => {
 	}
 };
 
-function isNumber(evt) {
-	var charCode = evt.keyCode;
-	return ( (charCode <= 31) || (charCode >= 48 && charCode <= 57) )
-}
 form = document.getElementsByTagName("form")[0];
 start = form.getElementsByTagName("input")[0];
 form.onpaste = event => event.preventDefault();
@@ -71,10 +67,6 @@ form.onsubmit = (event) => {
         document.getElementsByClassName("startNode")[0].classList.remove("startNode");
         document.getElementById(start.value).classList.add("startNode");
     }
-}
-// Color correct start node as selected.
-start.onsubmit = (event) => {
-    
 }
 
 // Returns stroke, arrowhead, and end coordinates.
