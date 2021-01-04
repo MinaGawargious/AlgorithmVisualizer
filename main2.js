@@ -1,12 +1,12 @@
 let svgns = "http://www.w3.org/2000/svg";
 let svg = document.querySelector("svg");
- 
+
 function setAttributes(element, attributes){
    for (let key in attributes){
        element.setAttribute(key, attributes[key]);
    }
 }
- 
+
 textColor = "white";
 let numNodes = 0;
 let sourceNode = newLine = newWeightText = draggedItem = null;
@@ -14,14 +14,14 @@ let selectedRect = document.createElementNS(svgns, "rect");
 setAttributes(selectedRect, {"fill": "none", "stroke": "blue"});
 let selected = null;
 let weighted = true, directed = true;
- 
+
 let adjacencyList = {}; // startID: [endIds]
 let lines = {}; // startID: [lineObject, label]
 let func = DFS;
 let startNode = null;
- 
+
 let discovered = [];
- 
+
 let algorithms = document.querySelectorAll(".algorithm");
 for(let algorithm of algorithms){
    algorithm.addEventListener("click", () => {
@@ -31,11 +31,11 @@ for(let algorithm of algorithms){
        console.log(algorithm);
    });
 }
- 
+
 let h = 6;
 let w = 4;
 let defs = document.createElementNS(svgns, "defs");
- 
+
 for (color of ["Black", "Blue"]){
    for (distance of ["Near", "Far"]){
        let arrowheadMarker = document.createElementNS(svgns, "marker");
@@ -47,20 +47,26 @@ for (color of ["Black", "Blue"]){
    }
 }
 svg.appendChild(defs);
- 
+
+started = false;
+
 btn = document.getElementsByClassName("btn")[0];
 btn.onclick = (event) => {
    event.preventDefault();
    if(btn.classList.contains("play")) {
        btn.classList.remove("play");
        btn.classList.add("pause");
-       func(startNode);
+       if(!started){
+        func(startNode);
+        execute();
+       }
+       started = true;
    } else{
        btn.classList.remove("pause");
        btn.classList.add("play");
    }
 };
- 
+
 function isNumber(evt) {
    var charCode = evt.keyCode;
    return ( (charCode <= 31) || (charCode >= 48 && charCode <= 57) )
@@ -68,7 +74,7 @@ function isNumber(evt) {
 form = document.getElementsByTagName("form")[0];
 start = form.getElementsByTagName("input")[0];
 form.onpaste = event => event.preventDefault();
- 
+
 form.onsubmit = (event) => {
    event.preventDefault();
    if(start.value < numNodes){
@@ -78,7 +84,7 @@ form.onsubmit = (event) => {
        startNode = newStart;
    }
 }
- 
+
 // Returns stroke, arrowhead, and end coordinates.
 function getLineProperties(x1, y1, x2, y2){
    let distance = Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
@@ -94,7 +100,7 @@ function getLineProperties(x1, y1, x2, y2){
    }
    return [x2, y2, "transparent", "arrowheadBlack_Near"]
 }
- 
+
 function updateLabelPosition(x1, y1, x2, y2, label){
    let theta = Math.atan((x2-x1)/(y1-y2));
    let dy = Math.sin(theta);
@@ -108,7 +114,7 @@ function updateLabelPosition(x1, y1, x2, y2, label){
    let labelCenter = {"x": (x2+x1)/2 - dx*labelWidth*(0.5+padding), "y": (y2+y1)/2 - dy*labelHeight*(0.5 + padding)};
    setAttributes(label, {"x": labelCenter.x, "y": labelCenter.y, "text-anchor": "middle", "dominant-baseline": "middle"});
 }
- 
+
 // Used to shift when we create a double connection and when we drag. (x1, y1) is source point, (x2, y2) is end point.
 function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel, x1, y1, x2, y2, id1, id2){
    let theta = Math.atan((x2-x1)/(y1-y2));
@@ -121,10 +127,10 @@ function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel
    if(directed){
        let [incomingX2, incomingY2, incomingArrowheadColor, incomingArrowhead] = getLineProperties(x1, y1, x2, y2);
        let [outgoingX2, outgoingY2, outgoingArrowheadColor, outgoingArrowhead] = getLineProperties(x2, y2, x1, y1);
- 
+
        setAttributes(incoming, {"x1": x1 - w*dx, "y1": y1 - w*dy, "x2": incomingX2 - w*dx, "y2": incomingY2 - w*dy, "stroke": incomingArrowheadColor, "marker-end": `url(#${incomingArrowhead})`});
        setAttributes(outgoing, {"x1": x2 + w*dx, "y1": y2 + w*dy, "x2": outgoingX2 + w*dx, "y2": outgoingY2 + w*dy, "stroke": outgoingArrowheadColor, "marker-end": `url(#${outgoingArrowhead})`});
- 
+
        setAttributes(incomingLabel, {"pointer-events": "auto", "opacity": 1});
        setAttributes(outgoingLabel, {"pointer-events": "auto", "opacity": 1});
    }else{
@@ -135,11 +141,11 @@ function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel
        let labelToRemove = id1 < id2 ? incomingLabel : outgoingLabel;
        setAttributes(labelToRemove, {"pointer-events": "none", "opacity": 0});
    }
- 
+
    updateLabelPosition(x1 - w*dx, y1 - w*dy, x2 - w*dx, y2 - w*dy, incomingLabel);
    updateLabelPosition(x2 + w*dx, y2 + w*dy, x1 + w*dx, y1 + w*dy, outgoingLabel);
 }
- 
+
 function updateSingleConnection(line, label, x1, y1, x2, y2){
    if(x1 != x2 || y1 != y2){ // Avoid 0/0.
        let [lineX2, lineY2, lineArrowheadColor, lineArrowhead] = getLineProperties(x1, y1, x2, y2);
@@ -152,7 +158,7 @@ function updateSingleConnection(line, label, x1, y1, x2, y2){
        updateLabelPosition(x1, y1, x2, y2, label);
    }
 }
- 
+
 function updateAllLines(node){
    let x1 = node.cx.baseVal.value, y1 = node.cy.baseVal.value;
    // Incoming (override double connection below):
@@ -165,7 +171,7 @@ function updateAllLines(node){
            updateSingleConnection(incoming, label, x2, y2, x1, y1);
        }
    }
-  
+
    for(let i = 0; i < adjacencyList[node.id].length; i++){
        let endNodeId = adjacencyList[node.id][i];
        let endNode = svg.getElementById(endNodeId);
@@ -182,7 +188,7 @@ function updateAllLines(node){
        }
    }  
 }
- 
+
 function makeWeightsVisible(){
    for(let i in lines){
        for(let j in lines[i]){
@@ -190,7 +196,7 @@ function makeWeightsVisible(){
        }
    }
 }
- 
+
 function makeWeightsInvisible(){
    for(let i in lines){
        for(let j in lines[i]){
@@ -201,7 +207,7 @@ function makeWeightsInvisible(){
        setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
    }
 }
- 
+
 function setWeighted(newWeight){
    if(weighted != newWeight){
        weighted = newWeight;
@@ -215,7 +221,7 @@ function setWeighted(newWeight){
        console.log((weighted ? "" : "un") + "weighted");
    }
 }
- 
+
 function setDirected(newDirected){
    if(directed != newDirected){
        console.log("CHANGING")
@@ -226,7 +232,7 @@ function setDirected(newDirected){
        console.log((directed ? "" : "un") + "directed");
    }
 }
- 
+
 let addButton = document.getElementsByClassName("add")[0];
 addButton.addEventListener("click", (event) => {
    // Create new node.
@@ -239,7 +245,7 @@ addButton.addEventListener("click", (event) => {
        node.classList.add("startNode");
        startNode = node;
    }
- 
+
    let newText = document.createElementNS(svgns, "text");
    setAttributes(newText, {"text-anchor": "middle", "x": parseFloat(node.cx.baseVal.value)-0.5, "y": parseFloat(node.cy.baseVal.value)+4, "font-weight": "bold", "font-size": "16", "fill": textColor, "class": "disableSelect"});
    newText.textContent = numNodes;
@@ -248,7 +254,7 @@ addButton.addEventListener("click", (event) => {
    group.appendChild(node);
    group.appendChild(newText);
    svg.appendChild(group);
- 
+
    group.addEventListener("click", (event) => {
        if(sourceNode == null){
            sourceNode = node;
@@ -257,7 +263,7 @@ addButton.addEventListener("click", (event) => {
            if(directed){
                setAttributes(newLine, {"marker-end": "url(#arrowheadBlack_Near)"});
            }
- 
+
            newWeightText = document.createElementNS(svgns, "text");
            newWeightText.textContent = "1";
            newWeightText.addEventListener("click", (event) => {
@@ -269,7 +275,7 @@ addButton.addEventListener("click", (event) => {
                svg.appendChild(selectedRect);
                editLabel(selected);
            })
- 
+
            // LABELS MUST BE IN MEMORY AT ALL TIMES IN ORDER TO RESTORE AT CORRECT SPOT AND WEIGHTS WHEN GOING TO A WEIGHTED ALGORITHM.
            setAttributes(newWeightText, {"x": node.cx.baseVal.value, "y": node.cy.baseVal.value});
            svg.appendChild(newLine); 
@@ -284,7 +290,7 @@ addButton.addEventListener("click", (event) => {
            adjacencyList[sourceNode.id].push(node.id);
            lines[sourceNode.id].push({lineObject: newLine, label: newWeightText});
            setAttributes(newWeightText, {"node1": sourceNode.id, "node2": node.id});
- 
+
            if(adjacencyList[node.id].includes(sourceNode.id) && directed){ // Outgoing edge already exists. Incoming being created.
                let index = adjacencyList[node.id].indexOf(`${sourceNode.id}`);
                let outgoing = lines[node.id][index].lineObject; // newLine is incoming.
@@ -297,7 +303,7 @@ addButton.addEventListener("click", (event) => {
        }
    });
 });
- 
+
 svg.addEventListener("mousemove", (event) => {
    event.preventDefault();
    if(newLine != null){
@@ -309,7 +315,7 @@ svg.addEventListener("mousemove", (event) => {
        updateAllLines(draggedItem);
    }
 })
- 
+
 function doneEditing(){
    if(svg.contains(selectedRect)){
        svg.removeChild(selectedRect);
@@ -323,7 +329,7 @@ function doneEditing(){
        selected = null;
    }
 }
- 
+
 svg.addEventListener("mousedown", (event) => {
    if(event.target.tagName == "circle"){
        draggedItem = event.target;
@@ -333,14 +339,14 @@ svg.addEventListener("mousedown", (event) => {
 svg.addEventListener("mouseup", (event) => {
    draggedItem = null;
 })
- 
+
 // Called when we edit a label's text to adjust the position.
 function editLabel(label){
    let node1Id = label.getAttribute("node1");
    let node2Id = label.getAttribute("node2");
    let node1 = svg.getElementById(node1Id);
    let node2 = svg.getElementById(node2Id);
- 
+
    let incomingEntry = lines[node1Id][adjacencyList[node1Id].indexOf(node2Id)];
    if(!adjacencyList[node2Id].includes(node1Id)){ // Single connection.
        updateSingleConnection(incomingEntry.lineObject, incomingEntry.label, node1.cx.baseVal.value, node1.cy.baseVal.value, node2.cx.baseVal.value, node2.cy.baseVal.value);
@@ -350,7 +356,7 @@ function editLabel(label){
    }
    setAttributes(selectedRect, {"x": parseFloat(selected.getAttribute("x")) - selected.getBBox().width/2, "y": parseFloat(selected.getAttribute("y")) - selected.getBBox().height/2, "width": selected.getBBox().width, "height": selected.getBBox().height});
 }
- 
+
 document.addEventListener("keydown", (event) => {
    if(event.key == "Escape" || event.key == "Enter"){
        for (let element of [newLine, newWeightText]){
@@ -378,73 +384,172 @@ document.addEventListener("keydown", (event) => {
        }
    }
 });
- 
- 
+
+
 let baseWait = 2000;
 let speed = 2;
 let delay = baseWait/speed;
- 
+
 function sleep(ms){
    return new Promise(r => setTimeout(r, ms));
 }
- 
+
 function BFS(){
- 
+
 }
- 
- 
+
+
 // Unweighted. Directed or undirected. Focus on directed only for now, and we can add the option for an algorithm to be either directed or undirected later.
 // Current node: add current class. Finished, add finished class. Discovered and not finished, add discovered class.
 // let adjacencyList = {}; // startID: [endIds]
 // let lines = {}; // startID: [lineObject, label]
- 
+
+function waitListener(Element, ListenerName) {
+    return new Promise(function (resolve, reject) {
+        var listener = event => {
+            Element.removeEventListener(ListenerName, listener);
+            resolve(event);
+        };
+        Element.addEventListener(ListenerName, listener);
+    });
+}
+
+let steps = []; // {elements: [], actions: [], classList: []}
+
+async function DFS2(node){
+
+}
+
 async function DFS(node){
-   // Initially, all nodes & edges undiscovered.
-   // Highlight node as current:
-   node.classList.add("discoveredNode");
-   node.classList.add("currentNode");
-   await sleep(delay);
- 
-   // Loop through the edges:
-   for(let i in adjacencyList[node.id]){
-       // Dehighlight node, moving on to edge:
-       node.classList.remove("currentNode");
- 
-       // Highlight current edge:
-       let edge = lines[node.id][i].lineObject;
-       setAttributes(edge, {"stroke": "green"});
-       await sleep(delay);
- 
-       // Go on to neighbor node:
-       let neighbor = document.getElementById(adjacencyList[node.id][i]);
-       setAttributes(edge, {"stroke": "red"});
-       if(!neighbor.classList.contains("discoveredNode")){
-           await DFS(neighbor);
-       }
-       node.classList.add("currentNode");
-       await sleep(delay);
+    // Initially, all nodes & edges undiscovered.
+    // Highlight node as current:
+    node.classList.add("discoveredNode");
+    node.classList.add("currentNode");
+    await sleep(delay);
+
+    if(btn.classList.contains("play")){
+        await waitListener(btn,"click");
+    }
+
+    // Loop through the edges:
+    for(let i in adjacencyList[node.id]){
+        // Dehighlight node, moving on to edge:
+        node.classList.remove("currentNode");
+
+        // Highlight current edge:
+        let edge = lines[node.id][i].lineObject;
+        setAttributes(edge, {"stroke": "green"});
+        await sleep(delay);
+
+        if(btn.classList.contains("play")){
+            await waitListener(btn,"click");
+        }
+
+        // Go on to neighbor node:
+        let neighbor = document.getElementById(adjacencyList[node.id][i]);
+        setAttributes(edge, {"stroke": "red"});
+        if(!neighbor.classList.contains("discoveredNode")){
+            await DFS(neighbor);
+        }
+        node.classList.add("currentNode");
+        await sleep(delay);
+        if(btn.classList.contains("play")){
+            await waitListener(btn,"click");
+        }
    }
- 
+
    // Node finished:
    node.classList.remove("currentNode");
    node.classList.add("finishedNode");
    // await sleep(delay);
    return Promise.resolve();
 }
- 
+
+
+
+
+
+
+
+//DELETE DFS3
+async function DFS3(node){
+    // Initially, all nodes & edges undiscovered.
+    // Highlight node as current:
+    node.classList.add("discoveredNode");
+    node.classList.add("currentNode");
+    await sleep(delay);
+
+    // Loop through the edges:
+    for(let i in adjacencyList[node.id]){
+        // Dehighlight node, moving on to edge:
+        node.classList.remove("currentNode");
+
+        // Highlight current edge:
+        let edge = lines[node.id][i].lineObject;
+        setAttributes(edge, {"stroke": "green"});
+        await sleep(delay);
+
+        // Go on to neighbor node:
+        let neighbor = document.getElementById(adjacencyList[node.id][i]);
+        setAttributes(edge, {"stroke": "red"});
+        if(!neighbor.classList.contains("discoveredNode")){
+            await DFS(neighbor);
+        }
+        node.classList.add("currentNode");
+        await sleep(delay);
+   }
+
+   // Node finished:
+   node.classList.remove("currentNode");
+   node.classList.add("finishedNode");
+   // await sleep(delay);
+   return Promise.resolve();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function execute(){
+    for(let i = 0; i < steps.length; i++){
+        for(let j = 0; j < steps[i]["elements"].length; j++){
+            if(steps[i]["actions"][j] == "add"){
+                steps[i]["elements"][j].classList.add(steps[i]["classList"][j]);
+            }else{
+                steps[i]["elements"][j].classList.remove(steps[i]["classList"][j]);
+
+            }
+        }
+        await sleep(delay);
+    }
+}
+
 // yield can be used with a generator function as kind of like breakpoints.
 // I need to have some wait time between nodes explored, and allow for pausing. Promises and await may help.
- 
- 
- 
+
 function Dijkstra(){
- 
+
 }
- 
+
 function Bellman_Ford(){
- 
+
 }
- 
+
 // TODO: Types of edges/nodes:
    //  Undiscovered (no change needed).
    //  Discovered
@@ -454,6 +559,10 @@ function Bellman_Ford(){
 // Upon hover:
    // Show path.
 // Possible clean up with classes and objects instead of functions so as to have object property for visited, current...
- 
- 
+
+
 // Switch/clear: Reset discovered list. Reset node and edge colors to orange and black, respectively.
+
+
+// We can display where we are in code with method 1. However, it is hard to scrub through (especially backwards. we can probably run DFS first to get numSteps, then have a count variable incremented each step to scrub forwards, but backwards is impossible).
+// We can  allow for scrubbing through specific steps with method 2. With extra data, we can display where we are.

@@ -9,53 +9,56 @@
     --startFillColor : orange;
     --startBorderColor : lightblue;
   
-    --currentFillColor: green;
-    --currentBorderColor: transparent;
-    --finishedFillColor: red;
-    --finishedBorderColor: transparent;
-    --discoveredFillColor: yellow;
-    --discoveredBorderColor: transparent;
- }
+    --currentNodeFillColor: green;
+    --currentNodeBorderColor: transparent;
+    --finishedNodeFillColor: red;
+    --finishedNodeBorderColor: transparent;
+    --discoveredNodeFillColor: yellow;
+    --discoveredNodeBorderColor: transparent;
+
+    --currentEdgeStroke: green;
+    --finishedEdgeStroke: red;
+}
   
- body{
+body{
     margin: 0;
     padding: 0;
     height: 100vh;
     font-family: 'Courier New', Courier, monospace;
     display: flex;
     flex-direction: column;
- }
- header{
+}
+header{
     width: 100%;
     background: var(--header-color);
- }
- header ul{
+}
+header ul{
     display: flex;
     justify-content: flex-end;
     width: 100%;
     margin: 0 auto;
     padding: 0;
- }
- header ul li{
+}
+header ul li{
     list-style: none;
     position: relative;
     padding: 10px 0;
     /* transition: 0.5s; */
     box-sizing: border-box;
     border-right: 1px solid rgba(255, 255, 255, 0.2);
- }
- header ul li:not(#logo):hover{ /* If hover problems arise, remove the :not(#logo) part */
+}
+header ul li:not(#logo):hover{ /* If hover problems arise, remove the :not(#logo) part */
     background: var(--header-hover-color);
- }
- header ul li:last-child{
+}
+header ul li:last-child{
     border-right: none;
- }
- header ul li a{
+}
+header ul li a{
     text-decoration: none;
     padding: 0 20px;
     color: #fff;
- }
- header ul li ul{
+}
+header ul li ul{
     position: absolute;
     top: 38px;
     left: 0;
@@ -66,40 +69,40 @@
     /* change to 0 and hidden */
     opacity: 0;
     visibility: hidden;
- }
- header ul li:hover ul{
+}
+header ul li:hover ul{
     opacity: 1;
     visibility: visible;
- }
- header ul li ul li{
+}
+header ul li ul li{
     border-right: none;
     margin: 0;
     /* padding: 10px 10px 10px 10px; */
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     text-align: center;
- }
- header ul li ul li a{
+}
+header ul li ul li a{
     padding: 0;
     margin: 0;
- }
- #logo{
+}
+#logo{
     text-transform: uppercase;
- }
+}
   
- .content{
+.content{
     /* background: orange; */
     margin: auto;
     padding: auto;
     width: 100%;
     height: 100%;
     flex: 1;
- }
- svg{
+}
+svg{
     width: 100%;
     height: 100%;
- }
+}
   
- .add {
+.add {
     width:55px;
     height:55px;
     position: absolute;
@@ -112,8 +115,8 @@
     box-sizing:border-box;
     border-radius:50%;
     z-index: 1;
- }
- .add::before{
+}
+.add::before{
     content: "";
     width:55px;
     height:55px;
@@ -129,12 +132,12 @@
     opacity:0;
     z-index: -1;
     transition: opacity 0.35s ease;
- }
- .add:hover::before{
+}
+.add:hover::before{
     opacity:1;
- }
+}
   
- .btn {
+.btn {
     position: absolute;
     bottom: 70px;
     right: 10px;
@@ -143,14 +146,14 @@
     border: black 3px solid;
     border-radius: 50%;
     transition: border 0.2s ease-in-out;
- }
- .btn:hover {
+}
+.btn:hover {
     border: var(--play-hover-color) 3px solid;
- }
- .btn:hover .bar {
+}
+.btn:hover .bar {
     background-color: var(--play-hover-color);
- }
- .btn .bar {
+}
+.btn .bar {
     display: inline-block;
     position: absolute;
     top: 14px;
@@ -161,70 +164,78 @@
     background-color: black;
     transform-origin: center;
     transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
- }
- .btn.pause .bar-1 {
+}
+.btn.pause .bar-1 {
     transform: translateX(13.5px) translateY(0px) rotate(0deg);
- }
- .btn.pause .bar-2 {
+}
+.btn.pause .bar-2 {
     transform: translateX(24px) translateY(0px) rotate(0deg);
- }
- .btn.play .bar-1 {
+}
+.btn.play .bar-1 {
     transform: translateX(20px) translateY(-5px) rotate(-55deg);
- }
- .btn.play .bar-2 {
+}
+.btn.play .bar-2 {
     transform: translateX(20px) translateY(5px) rotate(-125deg);
- }
+}
   
- form{
+form{
     position: absolute;
     bottom: 130px;
     right: 10px;
- }
- input{
+}
+input{
     width: 45px;
     text-align: center;
- }
- label{
+}
+label{
     border-left: 0ch;
- }
+}
   
- .node{
+.node{
     fill: var(--fillColor);
     stroke: var(--borderColor);
- }
+}
   
- .startNode{
+.startNode{
     fill: var(--startFillColor);
     stroke: var(--startBorderColor);
- }
+}
   
- .discoveredNode{
-    fill: var(--discoveredFillColor);
-    stroke: var(--discoveredFillColor);
- }
+.discoveredNode{
+    fill: var(--discoveredNodeFillColor);
+    stroke: var(--discoveredNodeFillColor);
+}
   
- .finishedNode{
-    fill: var(--finishedFillColor);
-    stroke: var(--finishedBorderColor);
- }
+.finishedNode{
+    fill: var(--finishedNodeFillColor);
+    stroke: var(--finishedNodeBorderColor);
+}
   
- .currentNode{
-    fill: var(--currentFillColor);
-    stroke: var(--currentBorderColor);
- }
-  
- /* .currentEdge{
+.currentNode{
+    fill: var(--currentNodeFillColor);
+    stroke: var(--currentNodeBorderColor);
+}
+
+.finishedEdge{
+    stroke: var(--finishedEdgeStroke);
+}
+
+.currentEdge{
+    stroke: var(--currentEdgeStroke);
+}
+
+/* .currentEdge{
     fill: var(--currentFillColor);
     stroke: var(--currentBorderColor);
     marker-end: "url()"
  }
   
- .discoveredEdge{
+.discoveredEdge{
     fill: var(--discoveredFillColor);
     stroke: var(--discoveredFillColor);
- } */
+} */
   
- .disableSelect{
+.disableSelect{
     user-select: none;
     /* -webkit-user-select: none;
     -ms-user-select: none;
@@ -233,6 +244,6 @@
     -moz-user-select: none; */
   
     pointer-events:none;
- }
- /* TODO: Media queries (https://www.youtube.com/watch?v=krZvPvpOHm4&ab_channel=OnlineTutorials) 5:44*/
+}
+/* TODO: Media queries (https://www.youtube.com/watch?v=krZvPvpOHm4&ab_channel=OnlineTutorials) 5:44*/
  
