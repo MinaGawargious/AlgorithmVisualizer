@@ -20,8 +20,6 @@ let lines = {}; // startID: [lineObject, label]
 let func = DFS;
 let startNode = null;
 
-let discovered = [];
-
 let algorithms = document.querySelectorAll(".algorithm");
 for(let algorithm of algorithms){
    algorithm.addEventListener("click", () => {
@@ -415,12 +413,47 @@ function waitListener(Element, ListenerName) {
 }
 
 let steps = []; // {elements: [], actions: [], classList: []}
+let discovered = [];
+let priorEdge = null;
 
-async function DFS2(node){
+// Step-based:
+async function DFS(node){
+    // Initially, all nodes & edges undiscovered.
+    // Highlight node as current:
+    if(priorEdge == null){
+        steps.push({"elements": [node, node], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"]});
+    }else{
+        steps.push({"elements": [node, node, priorEdge], "actions": ["add", "add", "remove"], "classList": ["discoveredNode", "currentNode", "currentEdge"]});
+    }
+    priorEdge = null;
+    discovered.push(node.id);
 
+    // Loop through the edges:
+    for(let i in adjacencyList[node.id]){
+        let edge = lines[node.id][i].lineObject;
+
+        // Dehighlight node, highlight current edge.
+        steps.push({"elements": [node, edge, edge], "actions": ["remove", "add", "add"], "classList": ["currentNode", "discoveredEdge", "currentEdge"]});
+
+        // Go on to neighbor node:
+        let neighbor = document.getElementById(adjacencyList[node.id][i]);
+        if(!discovered.includes(neighbor.id)){
+            priorEdge = edge;
+            await DFS(neighbor);
+            steps[steps.length-1] = {"elements": [neighbor, neighbor, node], "actions": ["remove", "add", "add"], "classList": ["currentNode", "finishedNode", "currentNode"]}; // Override prior entry to make node current.
+        }else{
+            // Node already discovered, so this edge will not actually be explored.
+            steps.push({"elements": [edge, node], "actions": ["remove", "add"], "classList": ["currentEdge", "currentNode"]});
+        }
+    }
+   
+    // Node finished:
+    steps.push({"elements": [node, node], "actions": ["remove", "add"], "classList": ["currentNode", "finishedNode"]});  // If node is startNode, this will not be overridden. Mark node as finished.
+    return Promise.resolve();
 }
 
-async function DFS(node){
+// Not step-based:
+async function DFS2(node){
     // Initially, all nodes & edges undiscovered.
     // Highlight node as current:
     node.classList.add("discoveredNode");
@@ -461,69 +494,8 @@ async function DFS(node){
    // Node finished:
    node.classList.remove("currentNode");
    node.classList.add("finishedNode");
-   // await sleep(delay);
    return Promise.resolve();
 }
-
-
-
-
-
-
-
-//DELETE DFS3
-async function DFS3(node){
-    // Initially, all nodes & edges undiscovered.
-    // Highlight node as current:
-    node.classList.add("discoveredNode");
-    node.classList.add("currentNode");
-    await sleep(delay);
-
-    // Loop through the edges:
-    for(let i in adjacencyList[node.id]){
-        // Dehighlight node, moving on to edge:
-        node.classList.remove("currentNode");
-
-        // Highlight current edge:
-        let edge = lines[node.id][i].lineObject;
-        setAttributes(edge, {"stroke": "green"});
-        await sleep(delay);
-
-        // Go on to neighbor node:
-        let neighbor = document.getElementById(adjacencyList[node.id][i]);
-        setAttributes(edge, {"stroke": "red"});
-        if(!neighbor.classList.contains("discoveredNode")){
-            await DFS(neighbor);
-        }
-        node.classList.add("currentNode");
-        await sleep(delay);
-   }
-
-   // Node finished:
-   node.classList.remove("currentNode");
-   node.classList.add("finishedNode");
-   // await sleep(delay);
-   return Promise.resolve();
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 async function execute(){
     for(let i = 0; i < steps.length; i++){
@@ -532,15 +504,14 @@ async function execute(){
                 steps[i]["elements"][j].classList.add(steps[i]["classList"][j]);
             }else{
                 steps[i]["elements"][j].classList.remove(steps[i]["classList"][j]);
-
             }
         }
         await sleep(delay);
+        if(btn.classList.contains("play")){
+            await waitListener(btn,"click");
+        }
     }
 }
-
-// yield can be used with a generator function as kind of like breakpoints.
-// I need to have some wait time between nodes explored, and allow for pausing. Promises and await may help.
 
 function Dijkstra(){
 

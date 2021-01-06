@@ -216,24 +216,13 @@ label{
     stroke: var(--currentNodeBorderColor);
 }
 
-.finishedEdge{
+.discoveredEdge{
     stroke: var(--finishedEdgeStroke);
 }
 
 .currentEdge{
     stroke: var(--currentEdgeStroke);
 }
-
-/* .currentEdge{
-    fill: var(--currentFillColor);
-    stroke: var(--currentBorderColor);
-    marker-end: "url()"
- }
-  
-.discoveredEdge{
-    fill: var(--discoveredFillColor);
-    stroke: var(--discoveredFillColor);
-} */
   
 .disableSelect{
     user-select: none;
