@@ -9,7 +9,7 @@
    <header>
        <ul>
            <li><a href="#" class="DFS algorithm" weighted="false" directed="true">DFS</a></li>
-           <li><a href="#" class="BFS algorithm">BFS</a></li>
+           <li><a href="#" class="BFS algorithm" weighted="false" directed="true">BFS</a></li>
            <li id="logo">Graph Visualizer</li>
            <li><a href="#" class="Dijkstra algorithm">Dijkstra</a></li>
            <li><a href="#" class="Bellman_Ford algorithm">Bellman-Ford</a></li>
@@ -27,6 +27,15 @@
        <div class="add">
            <!-- <span class="addbar-1"></span> -->
            <!-- <span class="addbar-2"></span> -->
+       </div>
+       <div id="code" class="disableSelect">
+           <div id="DFSCode">
+               <p>DFS(u):</p>
+               <p>&emsp;for each edge (u,v):</p>
+               <p>&emsp;&emsp;if node v not discovered, DFS(v)</p>
+               <p>&emsp;&emsp;else, back to node u</p>
+               <p>&emsp;return</p>
+           </div>
        </div>
    </section>
 </body>

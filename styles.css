@@ -17,7 +17,7 @@
     --discoveredNodeBorderColor: transparent;
 
     --currentEdgeStroke: green;
-    --finishedEdgeStroke: red;
+    --discoveredEdgeStroke: red;
 }
   
 body{
@@ -190,6 +190,23 @@ input{
 label{
     border-left: 0ch;
 }
+
+#code{
+    background: rgba(173, 216, 230, 0.4);
+    width: auto;
+    height: auto;
+    bottom: 10px;
+    left: 10px;
+    position: absolute;
+    overflow: hidden;
+    display: inline;
+}
+#code p{
+    padding: 0px 0px 5px 5px;
+    margin: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    /* background: red; */
+}
   
 .node{
     fill: var(--fillColor);
@@ -200,26 +217,34 @@ label{
     fill: var(--startFillColor);
     stroke: var(--startBorderColor);
 }
-  
 .discoveredNode{
     fill: var(--discoveredNodeFillColor);
     stroke: var(--discoveredNodeFillColor);
 }
-  
 .finishedNode{
     fill: var(--finishedNodeFillColor);
     stroke: var(--finishedNodeBorderColor);
 }
-  
 .currentNode{
     fill: var(--currentNodeFillColor);
     stroke: var(--currentNodeBorderColor);
 }
 
-.discoveredEdge{
-    stroke: var(--finishedEdgeStroke);
+@keyframes blink{
+    50% {
+        opacity: 0;
+    }
+    100%{
+        opacity: 1;
+    }
+}
+.goingTo{
+    animation: blink 0.35s linear infinite;
 }
 
+.discoveredEdge{
+    stroke: var(--discoveredEdgeStroke);
+}
 .currentEdge{
     stroke: var(--currentEdgeStroke);
 }
@@ -233,6 +258,9 @@ label{
     -moz-user-select: none; */
   
     pointer-events:none;
+}
+.invisible{
+    display: none;
 }
 /* TODO: Media queries (https://www.youtube.com/watch?v=krZvPvpOHm4&ab_channel=OnlineTutorials) 5:44*/
  
