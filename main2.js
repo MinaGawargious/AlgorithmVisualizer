@@ -48,22 +48,22 @@ for (color of ["Black", "Blue"]){
 }
 svg.appendChild(defs);
 
-started = false;
+let started = false;
 
-btn = document.getElementsByClassName("btn")[0];
-btn.onclick = (event) => {
+playPause = document.getElementsByClassName("playPause")[0];
+playPause.onclick = (event) => {
     event.preventDefault();
-    if(btn.classList.contains("play")) {
-        btn.classList.remove("play");
-        btn.classList.add("pause");
+    if(playPause.classList.contains("play")) {
+        playPause.classList.remove("play");
+        playPause.classList.add("pause");
         if(!started){
             func(startNode);
             execute();
         }
         started = true;
     } else{
-        btn.classList.remove("pause");
-        btn.classList.add("play");
+        playPause.classList.remove("pause");
+        playPause.classList.add("play");
     }
 };
 
@@ -403,7 +403,6 @@ function waitListener(Element, ListenerName) {
     });
 }
 
-
 function BFS(){
 
 }
@@ -415,9 +414,6 @@ function BFS(){
 let steps = []; // {elements: [], actions: [], classList: []}
 let discovered = [];
 
-
-
-//TODO: codetrace indices.
 // Step-based with codetrace:
 async function DFS(node){
     // Initially, all nodes & edges undiscovered.
@@ -452,7 +448,6 @@ async function DFS(node){
 async function execute(){
     for(let i = 0; i < steps.length; i++){
         code.getElementsByTagName("p")[steps[i]["index"]].setAttribute("style", "color:green;");
-        code.getElementsByTagName("p")[steps[i]["index"]].setAttribute("text-decoration", "underline;");
         for(let j = 0; j < steps[i]["elements"].length; j++){
             if(steps[i]["actions"][j] == "add"){
                 steps[i]["elements"][j].classList.add(steps[i]["classList"][j]);
@@ -461,12 +456,13 @@ async function execute(){
             }
         }
         await sleep(baseWait/speed);
-        if(btn.classList.contains("play")){
-            await waitListener(btn,"click");
+        if(playPause.classList.contains("play")){
+            await waitListener(playPause,"click");
         }
         code.getElementsByTagName("p")[steps[i]["index"]].removeAttribute("style");
-        code.getElementsByTagName("p")[steps[i]["index"]].removeAttribute("text-decoration");
     }
+    playPause.classList.remove("pause");
+    playPause.classList.add("play");
 }
 
 function Dijkstra(){
@@ -486,6 +482,8 @@ function Bellman_Ford(){
 // Upon hover:
     // Show path.
 // Possible clean up with classes and objects instead of functions so as to have object property for visited, current...
+
+//TODO: BFS
 
 
 // Switch/clear: Reset discovered list. Reset node and edge colors to orange and black, respectively.

@@ -137,7 +137,7 @@ svg{
     opacity:1;
 }
   
-.btn {
+.playPause {
     position: absolute;
     bottom: 70px;
     right: 10px;
@@ -147,13 +147,13 @@ svg{
     border-radius: 50%;
     transition: border 0.2s ease-in-out;
 }
-.btn:hover {
+.playPause:hover {
     border: var(--play-hover-color) 3px solid;
 }
-.btn:hover .bar {
+.playPause:hover .bar {
     background-color: var(--play-hover-color);
 }
-.btn .bar {
+.playPause .bar {
     display: inline-block;
     position: absolute;
     top: 14px;
@@ -165,16 +165,16 @@ svg{
     transform-origin: center;
     transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
-.btn.pause .bar-1 {
+.playPause.pause .bar-1 {
     transform: translateX(13.5px) translateY(0px) rotate(0deg);
 }
-.btn.pause .bar-2 {
+.playPause.pause .bar-2 {
     transform: translateX(24px) translateY(0px) rotate(0deg);
 }
-.btn.play .bar-1 {
+.playPause.play .bar-1 {
     transform: translateX(20px) translateY(-5px) rotate(-55deg);
 }
-.btn.play .bar-2 {
+.playPause.play .bar-2 {
     transform: translateX(20px) translateY(5px) rotate(-125deg);
 }
   
@@ -191,8 +191,7 @@ label{
     border-left: 0ch;
 }
 
-#code{
-    background: rgba(173, 216, 230, 0.4);
+#codetrace{
     width: auto;
     height: auto;
     bottom: 10px;
@@ -201,7 +200,13 @@ label{
     overflow: hidden;
     display: inline;
 }
-#code p{
+#codetrace #current{
+    background: rgba(52, 26, 20, 0.4);
+}
+#codetrace #code{
+    background: rgba(173, 216, 230, 0.9);
+}
+#codetrace p{
     padding: 0px 0px 5px 5px;
     margin: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.18);
@@ -234,9 +239,9 @@ label{
     50% {
         opacity: 0;
     }
-    100%{
-        opacity: 1;
-    }
+    /* 100%{ */
+        /* opacity: 1; */
+    /* } */
 }
 .goingTo{
     animation: blink 0.35s linear infinite;
