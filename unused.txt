@@ -792,3 +792,26 @@ async function DFS2(node){
    return Promise.resolve();
 }
 
+
+
+
+OLD WEIGHT VISIBILITY CODE:
+
+function makeWeightsVisible(){
+    for(let i in lines){
+        for(let j in lines[i]){
+            setAttributes(lines[i][j].label, {"pointer-events": "auto", "opacity": 1});
+        }
+    }
+}
+
+function makeWeightsInvisible(){
+    for(let i in lines){
+        for(let j in lines[i]){
+            setAttributes(lines[i][j].label, {"pointer-events": "none", "opacity": 0});
+        }
+    }
+    if(newWeightText != null){
+        setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
+    }
+}

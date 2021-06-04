@@ -34,7 +34,7 @@ header{
 }
 header ul{
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     width: 100%;
     margin: 0 auto;
     padding: 0;
@@ -200,17 +200,17 @@ label{
     overflow: hidden;
     display: inline;
 }
-#codetrace #current{
-    background: rgba(52, 26, 20, 0.4);
-}
-#codetrace #code{
-    background: rgba(173, 216, 230, 0.9);
-}
 #codetrace p{
     padding: 0px 0px 5px 5px;
     margin: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.18);
     /* background: red; */
+}
+#codetrace #current{
+    background: rgba(52, 26, 20, 0.4);
+}
+#codetrace #code p{
+    background: rgba(173, 216, 230, 0.9);
 }
   
 .node{

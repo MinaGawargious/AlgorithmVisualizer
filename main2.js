@@ -189,21 +189,13 @@ function updateAllLines(node){
     }  
 }
 
-function makeWeightsVisible(){
+function changeWeightVisibility(visible){
     for(let i in lines){
         for(let j in lines[i]){
-            setAttributes(lines[i][j].label, {"pointer-events": "auto", "opacity": 1});
+            setAttributes(lines[i][j].label, {"pointer-events": visible ? "auto" : "none", "opacity": visible ? 1 : 0});
         }
     }
-}
-
-function makeWeightsInvisible(){
-    for(let i in lines){
-        for(let j in lines[i]){
-            setAttributes(lines[i][j].label, {"pointer-events": "none", "opacity": 0});
-        }
-    }
-    if(newWeightText != null){
+    if(!visible && newWeightText != null){
         setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
     }
 }
@@ -213,10 +205,12 @@ function setWeighted(newWeight){
         weighted = newWeight;
         if(weighted){
             // addAllWeights();
-            makeWeightsVisible();
+            changeWeightVisibility(true);
+            // makeWeightsVisible();
         }else{
             // removeAllWeights();
-            makeWeightsInvisible();
+            changeWeightVisibility(false);
+            // makeWeightsInvisible();
         }
         console.log((weighted ? "" : "un") + "weighted");
     }
@@ -414,6 +408,7 @@ function BFS(){
 let steps = []; // {elements: [], actions: [], classList: []}
 let discovered = [];
 
+//TODO: ADD CURRENT INFO TO CODETRACE.
 // Step-based with codetrace:
 async function DFS(node){
     // Initially, all nodes & edges undiscovered.
@@ -447,7 +442,7 @@ async function DFS(node){
 
 async function execute(){
     for(let i = 0; i < steps.length; i++){
-        code.getElementsByTagName("p")[steps[i]["index"]].setAttribute("style", "color:green;");
+        code.getElementsByTagName("p")[steps[i]["index"]].setAttribute("style", "background:green;");
         for(let j = 0; j < steps[i]["elements"].length; j++){
             if(steps[i]["actions"][j] == "add"){
                 steps[i]["elements"][j].classList.add(steps[i]["classList"][j]);
