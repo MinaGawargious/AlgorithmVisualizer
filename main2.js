@@ -7,7 +7,7 @@ function setAttributes(element, attributes){
     }
 }
 
-textColor = "white";
+let nodeTextColor = "white";
 let numNodes = 0;
 let sourceNode = newLine = newWeightText = draggedItem = null;
 let selectedRect = document.createElementNS(svgns, "rect");
@@ -203,27 +203,18 @@ function changeWeightVisibility(visible){
 function setWeighted(newWeight){
     if(weighted != newWeight){
         weighted = newWeight;
-        if(weighted){
-            // addAllWeights();
-            changeWeightVisibility(true);
-            // makeWeightsVisible();
-        }else{
-            // removeAllWeights();
-            changeWeightVisibility(false);
-            // makeWeightsInvisible();
-        }
+        changeWeightVisibility(weighted);
         console.log((weighted ? "" : "un") + "weighted");
     }
 }
 
 function setDirected(newDirected){
     if(directed != newDirected){
-        console.log("CHANGING")
         directed = newDirected;
         for(let node of svg.getElementsByTagNameNS(svgns, "circle")){
             updateAllLines(node);
         }
-        console.log((directed ? "" : "un") + "directed");
+        console.log("CHANGING TO " + (directed ? "" : "un") + "directed");
     }
 }
 
@@ -241,7 +232,7 @@ addButton.addEventListener("click", (event) => {
     }
 
     let newText = document.createElementNS(svgns, "text");
-    setAttributes(newText, {"text-anchor": "middle", "x": parseFloat(node.cx.baseVal.value)-0.5, "y": parseFloat(node.cy.baseVal.value)+4, "font-weight": "bold", "font-size": "16", "fill": textColor, "class": "disableSelect"});
+    setAttributes(newText, {"text-anchor": "middle", "x": parseFloat(node.cx.baseVal.value)-0.5, "y": parseFloat(node.cy.baseVal.value)+4, "font-weight": "bold", "font-size": "16", "fill": nodeTextColor, "class": "disableSelect"});
     newText.textContent = numNodes;
     adjacencyList[numNodes] = []
     lines[numNodes++] = []
@@ -474,15 +465,5 @@ function Bellman_Ford(){
     //  Current
 // Additional for node:
     //  Finished
-// Upon hover:
-    // Show path.
+    
 // Possible clean up with classes and objects instead of functions so as to have object property for visited, current...
-
-//TODO: BFS
-
-
-// Switch/clear: Reset discovered list. Reset node and edge colors to orange and black, respectively.
-
-
-// We can display where we are in code with method 1. However, it is hard to scrub through (especially backwards. we can probably run DFS first to get numSteps, then have a count variable incremented each step to scrub forwards, but backwards is impossible).
-// We can  allow for scrubbing through specific steps with method 2. With extra data, we can display where we are.

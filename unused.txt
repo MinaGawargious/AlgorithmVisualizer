@@ -815,3 +815,32 @@ function makeWeightsInvisible(){
         setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
     }
 }
+
+
+
+OLD SETWEIGHTED:
+function setWeighted(newWeight){
+    if(weighted != newWeight){
+        weighted = newWeight;
+        if(weighted){
+            // addAllWeights();
+            changeWeightVisibility(true);
+            // makeWeightsVisible();
+        }else{
+            // removeAllWeights();
+            changeWeightVisibility(false);
+            // makeWeightsInvisible();
+        }
+        console.log((weighted ? "" : "un") + "weighted");
+    }
+}
+
+
+
+
+
+OLD COMMENTS:
+/****************************************
+// We can display where we are in code with method 1. However, it is hard to scrub through (especially backwards. we can probably run DFS first to get numSteps, then have a count variable incremented each step to scrub forwards, but backwards is impossible).
+// We can  allow for scrubbing through specific steps with method 2. With extra data, we can display where we are.
+****************************************/
