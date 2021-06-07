@@ -1,13 +1,22 @@
 :root {
+    --svg-background-color: #505050;
+
+    --add-color: #c6d8e3;
+    --play-color: #c6d8e3;
+    --header-color: #c6d8e3;
+    --codetrace-code-color: #c6d8e3;
     --add-hover-color: pink;
+    /* --play-color: #004fff; */
     --play-hover-color: red;
-    --header-color: lightblue;
+    /* --header-color: #004fff; */
     --header-hover-color: lightgreen;
+    --header-text-color: black;
     --play-hover-color: pink;
-    --borderColor : transparent;
-    --fillColor : orange;
-    --startFillColor : orange;
-    --startBorderColor : lightblue;
+    --borderColor: transparent;
+    --fillColor: orange;
+    --startFillColor: orange;
+    --startBorderColor: lightblue;
+    /* --codetrace-code-color: #004fff; */
   
     --currentNodeFillColor: green;
     --currentNodeBorderColor: transparent;
@@ -56,7 +65,7 @@ header ul li:last-child{
 header ul li a{
     text-decoration: none;
     padding: 0 20px;
-    color: #fff;
+    color: var(--header-text-color);
 }
 header ul li ul{
     position: absolute;
@@ -100,6 +109,7 @@ header ul li ul li a{
 svg{
     width: 100%;
     height: 100%;
+    background-color: var(--svg-background-color);
 }
   
 .add {
@@ -108,10 +118,10 @@ svg{
     position: absolute;
     bottom: 10px;
     right: 10px;
-    background: linear-gradient(#000,#000) top left, linear-gradient(#000,#000) top right, linear-gradient(#000,#000) bottom left, linear-gradient(#000,#000) bottom right;
+    background: linear-gradient(var(--add-color),var(--add-color)) top left, linear-gradient(var(--add-color),var(--add-color)) top right, linear-gradient(var(--add-color),var(--add-color)) bottom left, linear-gradient(var(--add-color),var(--add-color)) bottom right;
     background-size: calc(50% - 1px) calc(50% - 1px); /*thickness = 2px (2*1px) */
     background-repeat:no-repeat;
-    border:10px solid #000; /*length = 30px (50px - 2x10px) */
+    border:10px solid var(--add-color); /*length = 30px (50px - 2x10px) */
     box-sizing:border-box;
     border-radius:50%;
     z-index: 1;
@@ -143,7 +153,7 @@ svg{
     right: 10px;
     width: 49px;
     height: 49px;
-    border: black 3px solid;
+    border: var(--play-color) 3px solid;
     border-radius: 50%;
     transition: border 0.2s ease-in-out;
 }
@@ -161,7 +171,7 @@ svg{
     width: 3px;
     height: 20px;
     border-radius: 3px;
-    background-color: black;
+    background-color: var(--play-color);
     transform-origin: center;
     transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
@@ -180,6 +190,7 @@ svg{
   
 form{
     position: absolute;
+    height: 20px;
     bottom: 130px;
     right: 10px;
 }
@@ -199,6 +210,7 @@ label{
     position: absolute;
     overflow: hidden;
     display: inline;
+    opacity: 0.7;
 }
 #codetrace p{
     padding: 0px 0px 5px 5px;
@@ -210,7 +222,7 @@ label{
     background: rgba(52, 26, 20, 0.4);
 }
 #codetrace #code p{
-    background: rgba(173, 216, 230, 0.9);
+    background: var(--codetrace-code-color);
 }
   
 .node{
@@ -267,5 +279,39 @@ label{
 .invisible{
     display: none;
 }
+
+#speedSlider{
+    -webkit-appearance: none;
+    /* padding: 0;
+    margin: 0; */
+    width: 52px;
+    height: 15px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity 0.25s;
+    position: absolute;
+    bottom: 154px;
+    right: 10px;
+    /* z-index: 3; */
+}
+#speedSlider:hover {
+    opacity: 1;
+}   
+#speedSlider::-webkit-slider-thumb { /* Safari, Chrome, Edge */
+    -webkit-appearance: none;
+    appearance: none;
+    width: 7px;
+    height: 15px;
+    background: #04AA6D;
+    cursor: pointer;
+}
+#speedSlider::-moz-range-thumb { /* Firefox */
+    appearance: none;
+    width: 5px;
+    height: 15px;
+    background: #04AA6D;
+    cursor: pointer;
+}
 /* TODO: Media queries (https://www.youtube.com/watch?v=krZvPvpOHm4&ab_channel=OnlineTutorials) 5:44*/
- 

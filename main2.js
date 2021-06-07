@@ -25,7 +25,7 @@ let algorithms = document.querySelectorAll(".algorithm");
 for(let algorithm of algorithms){
     algorithm.addEventListener("click", () => {
         func = window[algorithm.classList[0]];
-        code = document.getElementById(func.name+"Code")
+        code = document.getElementById(func.name+"Code");
         setWeighted(algorithm.getAttribute("weighted") == "true");
         setDirected(algorithm.getAttribute("directed") == "true");
         console.log(algorithm);
@@ -371,8 +371,8 @@ document.addEventListener("keydown", (event) => {
 });
 
 
-let baseWait = 2000;
-let speed = 2;
+let baseWait = 2500;
+let slider = document.getElementById("speedSlider");
 
 function sleep(ms){
     return new Promise(r => setTimeout(r, ms));
@@ -388,9 +388,7 @@ function waitListener(Element, ListenerName) {
     });
 }
 
-function BFS(){
-
-}
+function BFS(){}
 
 // Unweighted. Directed or undirected. Focus on directed only for now, and we can add the option for an algorithm to be either directed or undirected later.
 // let adjacencyList = {}; // startID: [endIds]
@@ -441,7 +439,7 @@ async function execute(){
                 steps[i]["elements"][j].classList.remove(steps[i]["classList"][j]);
             }
         }
-        await sleep(baseWait/speed);
+        await sleep(baseWait/slider.value);
         if(playPause.classList.contains("play")){
             await waitListener(playPause,"click");
         }
@@ -451,13 +449,9 @@ async function execute(){
     playPause.classList.add("play");
 }
 
-function Dijkstra(){
+function Dijkstra(){}
 
-}
-
-function Bellman_Ford(){
-
-}
+function Bellman_Ford(){}
 
 // TODO: Types of edges/nodes:
     //  Undiscovered (no change needed).
