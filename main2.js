@@ -21,6 +21,12 @@ let func = DFS;
 let code = document.getElementById("DFSCode");
 let startNode = null;
 
+// let adjacencyList = {}; // startID: [endIds]
+// let lines = {}; // startID: [lineObject, label]
+
+let steps = []; // {elements: [], actions: [], classList: []}
+let discovered = [];
+
 let algorithms = document.querySelectorAll(".algorithm");
 for(let algorithm of algorithms){
     algorithm.addEventListener("click", () => {
@@ -49,19 +55,24 @@ for (color of ["Black", "Blue"]){
 svg.appendChild(defs);
 
 let started = false;
+let stepSlider = document.getElementById("stepSlider");
 
 playPause = document.getElementsByClassName("playPause")[0];
-playPause.onclick = (event) => {
+playPause.onclick = async (event) => {
     event.preventDefault();
-    if(playPause.classList.contains("play")) {
+    if(playPause.classList.contains("play")) { // Currently paused. Now play.
         playPause.classList.remove("play");
         playPause.classList.add("pause");
         if(!started){
-            func(startNode);
+            await func(startNode);
             execute();
         }
         started = true;
-    } else{
+        console.log("setting max to ", steps.length);
+        stepSlider.setAttribute("max", steps.length);
+        stepSlider.classList.remove("disableSelect");
+        stepSlider.classList.remove("disableElement");
+    } else{ // Currently playing. Now pause.
         playPause.classList.remove("pause");
         playPause.classList.add("play");
     }
@@ -391,11 +402,6 @@ function waitListener(Element, ListenerName) {
 function BFS(){}
 
 // Unweighted. Directed or undirected. Focus on directed only for now, and we can add the option for an algorithm to be either directed or undirected later.
-// let adjacencyList = {}; // startID: [endIds]
-// let lines = {}; // startID: [lineObject, label]
-
-let steps = []; // {elements: [], actions: [], classList: []}
-let discovered = [];
 
 //TODO: ADD CURRENT INFO TO CODETRACE.
 // Step-based with codetrace:
@@ -461,3 +467,6 @@ function Bellman_Ford(){}
     //  Finished
     
 // Possible clean up with classes and objects instead of functions so as to have object property for visited, current...
+
+
+/* Upon pressing start, we execute the function (like DFS) to find how many steps are needed. We set this as the max value of the step slider and enable it. The alternative of always having the slider enabled and recalculating DFS upon every new edge creation and adjusting the max value accordingly so the user can always slide through the algorithm is slow and wasteful. Must press start first to get number of steps. Then you can scrub through or pause then scrub if you don't want it to continue.*/
