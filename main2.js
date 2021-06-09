@@ -68,8 +68,8 @@ playPause.onclick = async (event) => {
             execute();
         }
         started = true;
-        console.log("setting max to ", steps.length - 1);
-        stepSlider.setAttribute("max", steps.length - 1);
+        console.log("setting max to ", steps.length);
+        stepSlider.setAttribute("max", steps.length);
         stepSlider.classList.remove("disableSelect");
         stepSlider.classList.remove("disableElement");
     } else{ // Currently playing. Now pause.
@@ -378,6 +378,12 @@ document.addEventListener("keydown", (event) => {
             selected.textContent = selected.textContent.slice(0, cursorIndex) + event.key + selected.textContent.slice(cursorIndex);
             editLabel(selected);
         }
+    }else if (event.key == "ArrowRight"){
+        // Step forward.
+    }else if (event.key == "ArrowLeft"){
+        // Step back.
+    }else if (event.key == " "){
+        // Toggle play/pause.
     }
 });
 
@@ -445,16 +451,13 @@ async function execute(){
                 steps[stepSlider.value]["elements"][j].classList.remove(steps[stepSlider.value]["classList"][j]);
             }
         }
+        stepSlider.setAttribute("value", parseInt(stepSlider.getAttribute("value")) + 1);
+        console.log("Setting to ", stepSlider.getAttribute("value"))
         await sleep(baseWait/slider.value);
         if(playPause.classList.contains("play")){
             await waitListener(playPause,"click");
         }
-        code.getElementsByTagName("p")[steps[stepSlider.value]["index"]].removeAttribute("style");
-        if(stepSlider.value < steps.length-1){
-            stepSlider.setAttribute("value", parseInt(stepSlider.getAttribute("value")) + 1);
-        }else if (stepSlider.value == steps.length-1){
-            break;
-        }
+        code.getElementsByTagName("p")[steps[stepSlider.value-1]["index"]].removeAttribute("style");
     }
     playPause.classList.remove("pause");
     playPause.classList.add("play");
@@ -475,3 +478,5 @@ function Bellman_Ford(){}
 
 
 /* Upon pressing start, we execute the function (like DFS) to find how many steps are needed. We set this as the max value of the step slider and enable it. The alternative of always having the slider enabled and recalculating DFS upon every new edge creation and adjusting the max value accordingly so the user can always slide through the algorithm is slow and wasteful. Must press start first to get number of steps. Then you can scrub through or pause then scrub if you don't want it to continue.*/
+
+// Step slider's value is next step to execute. Because of this, we need steps.length + 1 intervals. If we have 2 steps, slider has 3 discrete values. Going from 0 to 1 executes step 0. 1 to 2 executes step 1. If we only have 1 step, slider needs 2 values: before executing and after.
