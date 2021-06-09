@@ -68,8 +68,8 @@ playPause.onclick = async (event) => {
             execute();
         }
         started = true;
-        console.log("setting max to ", steps.length);
-        stepSlider.setAttribute("max", steps.length);
+        console.log("setting max to ", steps.length - 1);
+        stepSlider.setAttribute("max", steps.length - 1);
         stepSlider.classList.remove("disableSelect");
         stepSlider.classList.remove("disableElement");
     } else{ // Currently playing. Now pause.
@@ -436,20 +436,25 @@ async function DFS(node){
 }
 
 async function execute(){
-    for(let i = 0; i < steps.length; i++){
-        code.getElementsByTagName("p")[steps[i]["index"]].setAttribute("style", "background:green;");
-        for(let j = 0; j < steps[i]["elements"].length; j++){
-            if(steps[i]["actions"][j] == "add"){
-                steps[i]["elements"][j].classList.add(steps[i]["classList"][j]);
+    while(stepSlider.value < steps.length){
+        code.getElementsByTagName("p")[steps[stepSlider.value]["index"]].setAttribute("style", "background:green;");
+        for(let j = 0; j < steps[stepSlider.value]["elements"].length; j++){
+            if(steps[stepSlider.value]["actions"][j] == "add"){
+                steps[stepSlider.value]["elements"][j].classList.add(steps[stepSlider.value]["classList"][j]);
             }else{
-                steps[i]["elements"][j].classList.remove(steps[i]["classList"][j]);
+                steps[stepSlider.value]["elements"][j].classList.remove(steps[stepSlider.value]["classList"][j]);
             }
         }
         await sleep(baseWait/slider.value);
         if(playPause.classList.contains("play")){
             await waitListener(playPause,"click");
         }
-        code.getElementsByTagName("p")[steps[i]["index"]].removeAttribute("style");
+        code.getElementsByTagName("p")[steps[stepSlider.value]["index"]].removeAttribute("style");
+        if(stepSlider.value < steps.length-1){
+            stepSlider.setAttribute("value", parseInt(stepSlider.getAttribute("value")) + 1);
+        }else if (stepSlider.value == steps.length-1){
+            break;
+        }
     }
     playPause.classList.remove("pause");
     playPause.classList.add("play");
