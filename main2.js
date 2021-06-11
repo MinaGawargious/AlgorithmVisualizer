@@ -443,27 +443,30 @@ async function DFS(node){
     return Promise.resolve();
 }
 
-function doNextStep(){
-    let value = stepSlider.value - 1;
-    if(value > 0){
-        code.getElementsByTagName("p")[steps[value-1]["index"]].removeAttribute("style");
+function doStep(step){
+    if(step > 0){
+        code.getElementsByTagName("p")[steps[step-1]["index"]].removeAttribute("style");
     }
-    code.getElementsByTagName("p")[steps[value]["index"]].setAttribute("style", "background:green;");
-    for(let j = 0; j < steps[value]["elements"].length; j++){
-        if(steps[value]["actions"][j] == "add"){
-            steps[value]["elements"][j].classList.add(steps[value]["classList"][j]);
+    code.getElementsByTagName("p")[steps[step]["index"]].setAttribute("style", "background:green;");
+    for(let j = 0; j < steps[step]["elements"].length; j++){
+        if(steps[step]["actions"][j] == "add"){
+            steps[step]["elements"][j].classList.add(steps[step]["classList"][j]);
         }else{
-            steps[value]["elements"][j].classList.remove(steps[value]["classList"][j]);
+            steps[step]["elements"][j].classList.remove(steps[step]["classList"][j]);
         }
     }
 }
 
+let oldValue = 0;
+
 async function execute(){
     while(stepSlider.value < steps.length){
         // Execute step at index stepSlider.value.
+        doStep(stepSlider.value);
         stepSlider.setAttribute("value", parseInt(stepSlider.getAttribute("value")) + 1);
         console.log("Setting to ", stepSlider.getAttribute("value"));
-        doNextStep();
+        console.log(oldValue, stepSlider.value);
+        oldValue = stepSlider.value;
         await sleep(baseWait/slider.value);
         if(playPause.classList.contains("play")){
             await waitListener(playPause,"click");
@@ -474,8 +477,12 @@ async function execute(){
 }
 
 stepSlider.oninput = (event) => {
-    console.log(stepSlider.value);
-    doNextStep();
+    console.log(oldValue, stepSlider.value);
+    while(oldValue < stepSlider.value){
+        console.log("oldValue = ", oldValue, " and stepSlider.value = ", stepSlider.value);
+        doStep(oldValue);
+        oldValue++;
+    }
 }
 
 function Dijkstra(){}
