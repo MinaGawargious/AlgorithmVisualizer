@@ -175,10 +175,10 @@ svg{
     transform-origin: center;
     transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
-.playPause.pause .bar-1 {
+.playPause .bar-1 {
     transform: translateX(13.5px) translateY(0px) rotate(0deg);
 }
-.playPause.pause .bar-2 {
+.playPause .bar-2 {
     transform: translateX(24px) translateY(0px) rotate(0deg);
 }
 .playPause.play .bar-1 {

@@ -62,7 +62,6 @@ playPause.onclick = async (event) => { // async is syntactic sugar to return the
     event.preventDefault();
     if(playPause.classList.contains("play")) { // Currently paused. Now play.
         playPause.classList.remove("play");
-        playPause.classList.add("pause");
         if(!started){
             await func(startNode); // await pauses execution until the promise is resolved.
             execute();
@@ -73,7 +72,6 @@ playPause.onclick = async (event) => { // async is syntactic sugar to return the
         stepSlider.classList.remove("disableSelect");
         stepSlider.classList.remove("disableElement");
     } else{ // Currently playing. Now pause.
-        playPause.classList.remove("pause");
         playPause.classList.add("play");
     }
 };
@@ -463,16 +461,15 @@ async function execute(){
     while(stepSlider.value < steps.length){
         // Execute step at index stepSlider.value.
         doStep(stepSlider.value);
-        stepSlider.setAttribute("value", parseInt(stepSlider.getAttribute("value")) + 1);
-        console.log("Setting to ", stepSlider.getAttribute("value"));
-        console.log(oldValue, stepSlider.value);
+        stepSlider.value++;
+        console.log("Going from ", oldValue, "to ", stepSlider.value);
         oldValue = stepSlider.value;
         await sleep(baseWait/slider.value);
         if(playPause.classList.contains("play")){
             await waitListener(playPause,"click");
         }
+        console.log("waitListener done. stepSlider.value = ", stepSlider.value);
     }
-    playPause.classList.remove("pause");
     playPause.classList.add("play");
 }
 
@@ -497,7 +494,6 @@ function Bellman_Ford(){}
     //  Finished
     
 // Possible clean up with classes and objects instead of functions so as to have object property for visited, current...
-
 
 /* Upon pressing start, we execute the function (like DFS) to find how many steps are needed. We set this as the max value of the step slider and enable it. The alternative of always having the slider enabled and recalculating DFS upon every new edge creation and adjusting the max value accordingly so the user can always slide through the algorithm is slow and wasteful. Must press start first to get number of steps. Then you can scrub through or pause then scrub if you don't want it to continue.*/
 
