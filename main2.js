@@ -68,7 +68,7 @@ playPause.onclick = async (event) => { // async is syntactic sugar to return the
             execute();
         }
         started = true;
-        // console.log("setting max to ", steps.length);
+        console.log("setting max to ", steps.length);
         stepSlider.setAttribute("max", steps.length);
         stepSlider.classList.remove("disableSelect");
         stepSlider.classList.remove("disableElement");
@@ -444,24 +444,25 @@ async function DFS(node){
 }
 
 function doNextStep(){
-    if(stepSlider.value > 0){
-        code.getElementsByTagName("p")[steps[stepSlider.value-1]["index"]].removeAttribute("style");
+    let value = stepSlider.value - 1;
+    if(value > 0){
+        code.getElementsByTagName("p")[steps[value-1]["index"]].removeAttribute("style");
     }
-    code.getElementsByTagName("p")[steps[stepSlider.value]["index"]].setAttribute("style", "background:green;");
-    for(let j = 0; j < steps[stepSlider.value]["elements"].length; j++){
-        if(steps[stepSlider.value]["actions"][j] == "add"){
-            steps[stepSlider.value]["elements"][j].classList.add(steps[stepSlider.value]["classList"][j]);
+    code.getElementsByTagName("p")[steps[value]["index"]].setAttribute("style", "background:green;");
+    for(let j = 0; j < steps[value]["elements"].length; j++){
+        if(steps[value]["actions"][j] == "add"){
+            steps[value]["elements"][j].classList.add(steps[value]["classList"][j]);
         }else{
-            steps[stepSlider.value]["elements"][j].classList.remove(steps[stepSlider.value]["classList"][j]);
+            steps[value]["elements"][j].classList.remove(steps[value]["classList"][j]);
         }
     }
-    stepSlider.setAttribute("value", parseInt(stepSlider.getAttribute("value")) + 1);
-    console.log("Setting to ", stepSlider.getAttribute("value"));
 }
 
 async function execute(){
     while(stepSlider.value < steps.length){
         // Execute step at index stepSlider.value.
+        stepSlider.setAttribute("value", parseInt(stepSlider.getAttribute("value")) + 1);
+        console.log("Setting to ", stepSlider.getAttribute("value"));
         doNextStep();
         await sleep(baseWait/slider.value);
         if(playPause.classList.contains("play")){
@@ -474,6 +475,7 @@ async function execute(){
 
 stepSlider.oninput = (event) => {
     console.log(stepSlider.value);
+    doNextStep();
 }
 
 function Dijkstra(){}
