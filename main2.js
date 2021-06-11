@@ -58,17 +58,17 @@ let started = false;
 let stepSlider = document.getElementById("stepSlider");
 
 playPause = document.getElementsByClassName("playPause")[0];
-playPause.onclick = async (event) => {
+playPause.onclick = async (event) => { // async is syntactic sugar to return the values as a resolved promise.
     event.preventDefault();
     if(playPause.classList.contains("play")) { // Currently paused. Now play.
         playPause.classList.remove("play");
         playPause.classList.add("pause");
         if(!started){
-            await func(startNode);
+            await func(startNode); // await pauses execution until the promise is resolved.
             execute();
         }
         started = true;
-        console.log("setting max to ", steps.length);
+        // console.log("setting max to ", steps.length);
         stepSlider.setAttribute("max", steps.length);
         stepSlider.classList.remove("disableSelect");
         stepSlider.classList.remove("disableElement");
@@ -283,6 +283,8 @@ addButton.addEventListener("click", (event) => {
                 setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
             }
         }else if(sourceNode != node && !adjacencyList[sourceNode.id].includes(node.id) && (directed || !adjacencyList[node.id].includes(sourceNode.id))){ // Second node to establish connection. Make sure we don't make an edge to ourselves or a duplicate edge. Also only allow edge in undirected graph if no edge between these two nodes exists.
+            playPause.classList.remove("disableElement");
+            playPause.classList.remove("disableSelect");
             adjacencyList[sourceNode.id].push(node.id);
             lines[sourceNode.id].push({lineObject: newLine, label: newWeightText});
             setAttributes(newWeightText, {"node1": sourceNode.id, "node2": node.id});
@@ -441,26 +443,37 @@ async function DFS(node){
     return Promise.resolve();
 }
 
+function doNextStep(){
+    if(stepSlider.value > 0){
+        code.getElementsByTagName("p")[steps[stepSlider.value-1]["index"]].removeAttribute("style");
+    }
+    code.getElementsByTagName("p")[steps[stepSlider.value]["index"]].setAttribute("style", "background:green;");
+    for(let j = 0; j < steps[stepSlider.value]["elements"].length; j++){
+        if(steps[stepSlider.value]["actions"][j] == "add"){
+            steps[stepSlider.value]["elements"][j].classList.add(steps[stepSlider.value]["classList"][j]);
+        }else{
+            steps[stepSlider.value]["elements"][j].classList.remove(steps[stepSlider.value]["classList"][j]);
+        }
+    }
+    stepSlider.setAttribute("value", parseInt(stepSlider.getAttribute("value")) + 1);
+    console.log("Setting to ", stepSlider.getAttribute("value"));
+}
+
 async function execute(){
     while(stepSlider.value < steps.length){
-        code.getElementsByTagName("p")[steps[stepSlider.value]["index"]].setAttribute("style", "background:green;");
-        for(let j = 0; j < steps[stepSlider.value]["elements"].length; j++){
-            if(steps[stepSlider.value]["actions"][j] == "add"){
-                steps[stepSlider.value]["elements"][j].classList.add(steps[stepSlider.value]["classList"][j]);
-            }else{
-                steps[stepSlider.value]["elements"][j].classList.remove(steps[stepSlider.value]["classList"][j]);
-            }
-        }
-        stepSlider.setAttribute("value", parseInt(stepSlider.getAttribute("value")) + 1);
-        console.log("Setting to ", stepSlider.getAttribute("value"))
+        // Execute step at index stepSlider.value.
+        doNextStep();
         await sleep(baseWait/slider.value);
         if(playPause.classList.contains("play")){
             await waitListener(playPause,"click");
         }
-        code.getElementsByTagName("p")[steps[stepSlider.value-1]["index"]].removeAttribute("style");
     }
     playPause.classList.remove("pause");
     playPause.classList.add("play");
+}
+
+stepSlider.oninput = (event) => {
+    console.log(stepSlider.value);
 }
 
 function Dijkstra(){}
@@ -479,4 +492,4 @@ function Bellman_Ford(){}
 
 /* Upon pressing start, we execute the function (like DFS) to find how many steps are needed. We set this as the max value of the step slider and enable it. The alternative of always having the slider enabled and recalculating DFS upon every new edge creation and adjusting the max value accordingly so the user can always slide through the algorithm is slow and wasteful. Must press start first to get number of steps. Then you can scrub through or pause then scrub if you don't want it to continue.*/
 
-// Step slider's value is next step to execute. Because of this, we need steps.length + 1 intervals. If we have 2 steps, slider has 3 discrete values. Going from 0 to 1 executes step 0. 1 to 2 executes step 1. If we only have 1 step, slider needs 2 values: before executing and after.
+// Step slider's value is next step to execute. Because of this, we need steps.length intervals, meaning steps.length + 1 discrete values. If we have 2 steps, slider has 3 discrete values. Going from 0 to 1 executes step 0. 1 to 2 executes step 1. If we only have 1 step, slider needs 1 interval or 2 values: before executing and after.
