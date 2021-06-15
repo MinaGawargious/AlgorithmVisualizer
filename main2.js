@@ -463,7 +463,7 @@ async function execute(){
         doStep(stepSlider.value);
         stepSlider.value++;
         console.log("Going from ", oldValue, "to ", stepSlider.value);
-        oldValue = stepSlider.value;
+        oldValue = parseInt(stepSlider.value);
         await sleep(baseWait/slider.value);
         if(playPause.classList.contains("play")){
             await waitListener(playPause,"click");
@@ -475,7 +475,8 @@ async function execute(){
 
 stepSlider.oninput = (event) => {
     console.log(oldValue, stepSlider.value);
-    while(oldValue < stepSlider.value){
+    let max = stepSlider.value;
+    while(oldValue < max){
         console.log("oldValue = ", oldValue, " and stepSlider.value = ", stepSlider.value);
         doStep(oldValue);
         oldValue++;
