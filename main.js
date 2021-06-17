@@ -140,8 +140,8 @@ function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel
         setAttributes(incoming, {"x1": x1 - w*dx, "y1": y1 - w*dy, "x2": incomingX2 - w*dx, "y2": incomingY2 - w*dy, "stroke": incomingArrowheadColor, "marker-end": `url(#${incomingArrowhead})`});
         setAttributes(outgoing, {"x1": x2 + w*dx, "y1": y2 + w*dy, "x2": outgoingX2 + w*dx, "y2": outgoingY2 + w*dy, "stroke": outgoingArrowheadColor, "marker-end": `url(#${outgoingArrowhead})`});
 
-        setAttributes(incomingLabel, {"pointer-events": "auto", "opacity": 1});
-        setAttributes(outgoingLabel, {"pointer-events": "auto", "opacity": 1});
+        setAttributes(incomingLabel, {"pointer-events": weighted ? "auto" : "none", "opacity": weighted ? 1 : 0});
+        setAttributes(outgoingLabel, {"pointer-events": weighted ? "auto" : "none", "opacity": weighted ? 1 : 0});
     }else{
         setAttributes(incoming, {"x1": x1, "y1": y1, "x2": x2, "y2": y2, "stroke": "black"});
         setAttributes(outgoing, {"x1": x2, "y1": y2, "x2": x1, "y2": y1, "stroke": "black"});
@@ -198,21 +198,17 @@ function updateAllLines(node){
     }  
 }
 
-function changeWeightVisibility(visible){
-    for(let i in lines){
-        for(let j in lines[i]){
-            setAttributes(lines[i][j].label, {"pointer-events": visible ? "auto" : "none", "opacity": visible ? 1 : 0});
-        }
-    }
-    if(!visible && newWeightText != null){
-        setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
-    }
-}
-
 function setWeighted(newWeight){
     if(weighted != newWeight){
         weighted = newWeight;
-        changeWeightVisibility(weighted);
+        for(let i in lines){
+            for(let j in lines[i]){
+                setAttributes(lines[i][j].label, {"pointer-events": weighted ? "auto" : "none", "opacity": weighted ? 1 : 0});
+            }
+        }
+        if(!weighted && newWeightText != null){
+            setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
+        }
         console.log((weighted ? "" : "un") + "weighted");
     }
 }
@@ -302,12 +298,17 @@ addButton.addEventListener("click", (event) => {
 
 svg.addEventListener("mousemove", (event) => {
     event.preventDefault();
+    if(sourceNode){
+        // console.log(event);
+    }
+    let X = event.offsetX;
+    let Y = event.offsetY;
     if(newLine != null){
-        updateSingleConnection(newLine, newWeightText, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, event.offsetX, event.offsetY);
+        updateSingleConnection(newLine, newWeightText, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, X, Y);
     }else if(draggedItem != null && draggedItem.tagName == "circle"){
-        setAttributes(draggedItem, {"cx": event.offsetX, "cy": event.offsetY});
-        setAttributes(draggedItem.nextElementSibling, {"x": event.offsetX-0.5, "y": event.offsetY+4});
-        setAttributes(draggedItem.parentElement, {"x": event.offsetX, "y": event.offsetY});
+        setAttributes(draggedItem, {"cx": X, "cy": Y});
+        setAttributes(draggedItem.nextElementSibling, {"x": X-0.5, "y": Y+4});
+        setAttributes(draggedItem.parentElement, {"x": X, "y": Y});
         updateAllLines(draggedItem);
     }
 })
@@ -475,7 +476,7 @@ async function execute(){
 
 stepSlider.oninput = (event) => {
     console.log(oldValue, stepSlider.value);
-    let max = stepSlider.value;
+    let max = parseInt(stepSlider.value);
     while(oldValue < max){
         console.log("oldValue = ", oldValue, " and stepSlider.value = ", stepSlider.value);
         doStep(oldValue);
