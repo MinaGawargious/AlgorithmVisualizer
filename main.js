@@ -21,9 +21,6 @@ let func = DFS;
 let code = document.getElementById("DFSCode");
 let startNode = null;
 
-// let adjacencyList = {}; // startID: [endIds]
-// let lines = {}; // startID: [lineObject, label]
-
 let steps = []; // {elements: [], actions: [], classList: []}
 let discovered = [];
 
@@ -48,7 +45,7 @@ for (color of ["Black", "Blue"]){
         setAttributes(arrowheadMarker, {"id": `arrowhead${color}_${distance}`, "markerWidth": h, "markerHeight": w, "refX": distance == "Far" ? 0 : h, "refY": w/2, "orient": "auto", "fill": color});
         let arrowhead = document.createElementNS(svgns, "polygon");
         arrowhead.setAttribute("points", `0 0, ${h} ${w/2}, 0 ${w}`);
-        arrowheadMarker.appendChild(arrowhead);  
+        arrowheadMarker.appendChild(arrowhead);
         defs.appendChild(arrowheadMarker); 
     }
 }
@@ -69,8 +66,7 @@ playPause.onclick = async (event) => { // async is syntactic sugar to return the
         started = true;
         console.log("setting max to ", steps.length);
         stepSlider.setAttribute("max", steps.length);
-        stepSlider.classList.remove("disableSelect");
-        stepSlider.classList.remove("disableElement");
+        stepSlider.classList.remove("disableSelect", "disableElement");
     } else{ // Currently playing. Now pause.
         playPause.classList.add("play");
     }
@@ -80,10 +76,10 @@ function isNumber(evt) {
     var charCode = evt.keyCode;
     return ( (charCode <= 31) || (charCode >= 48 && charCode <= 57) )
 }
+
 form = document.getElementsByTagName("form")[0];
 start = form.getElementsByTagName("input")[0];
 form.onpaste = event => event.preventDefault();
-
 form.onsubmit = (event) => {
     event.preventDefault();
     if(start.value < numNodes){
@@ -159,11 +155,7 @@ function updateSingleConnection(line, label, x1, y1, x2, y2){
     if(x1 != x2 || y1 != y2){ // Avoid 0/0.
         let [lineX2, lineY2, lineArrowheadColor, lineArrowhead] = getLineProperties(x1, y1, x2, y2);
         setAttributes(line, {"x1": x1, "y1": y1, "x2": directed ? lineX2: x2, "y2": directed ? lineY2: y2, "stroke": directed ? lineArrowheadColor : "black"});
-        if(directed){
-            setAttributes(line, {"marker-end": `url(#${lineArrowhead})`});
-        }else{
-            line.removeAttribute("marker-end");
-        }
+        directed ? setAttributes(line, {"marker-end": `url(#${lineArrowhead})`}) : line.removeAttribute("marker-end");
         updateLabelPosition(x1, y1, x2, y2, label);
     }
 }
@@ -195,7 +187,7 @@ function updateAllLines(node){
             let incomingLabel = lines[endNodeId][adjacencyList[endNodeId].indexOf(node.id)].label;
             updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel, x2, y2, x1, y1, endNodeId, node.id);
         }
-    }  
+    }
 }
 
 function setWeighted(newWeight){
@@ -268,17 +260,14 @@ addButton.addEventListener("click", (event) => {
 
             // LABELS MUST BE IN MEMORY AT ALL TIMES IN ORDER TO RESTORE AT CORRECT SPOT AND WEIGHTS WHEN GOING TO A WEIGHTED ALGORITHM.
             setAttributes(newWeightText, {"x": node.cx.baseVal.value, "y": node.cy.baseVal.value});
-            svg.appendChild(newLine); 
+            svg.appendChild(newLine);
             // There are two ways to add weight options. The first: remove labels from the HTML entirely. The second: simply make them invisible by setting opacity to 0. The first option also requires looping through all nodes as well to adjust label positions, and proved to be MUCH slower in dense graphs. So, the opacity option is better.
-            // if(weighted){
             svg.appendChild(newWeightText);
-            // }
             if(!weighted){
                 setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
             }
         }else if(sourceNode != node && !adjacencyList[sourceNode.id].includes(node.id) && (directed || !adjacencyList[node.id].includes(sourceNode.id))){ // Second node to establish connection. Make sure we don't make an edge to ourselves or a duplicate edge. Also only allow edge in undirected graph if no edge between these two nodes exists.
-            playPause.classList.remove("disableElement");
-            playPause.classList.remove("disableSelect");
+            playPause.classList.remove("disableElement", "disableSelect");
             adjacencyList[sourceNode.id].push(node.id);
             lines[sourceNode.id].push({lineObject: newLine, label: newWeightText});
             setAttributes(newWeightText, {"node1": sourceNode.id, "node2": node.id});
@@ -379,18 +368,14 @@ document.addEventListener("keydown", (event) => {
             selected.textContent = selected.textContent.slice(0, cursorIndex) + event.key + selected.textContent.slice(cursorIndex);
             editLabel(selected);
         }
-    }else if (event.key == "ArrowRight"){
+    }else if(event.key == "ArrowRight"){
         // Step forward.
-    }else if (event.key == "ArrowLeft"){
+    }else if(event.key == "ArrowLeft"){
         // Step back.
-    }else if (event.key == " "){
+    }else if(event.key == " "){
         // Toggle play/pause.
     }
 });
-
-
-let baseWait = 2500;
-let slider = document.getElementById("speedSlider");
 
 function sleep(ms){
     return new Promise(r => setTimeout(r, ms));
@@ -457,6 +442,8 @@ function doStep(step){
 }
 
 let oldValue = 0;
+let baseWait = 2500;
+let speedSlider = document.getElementById("speedSlider");
 
 async function execute(){
     while(stepSlider.value < steps.length){
@@ -465,7 +452,7 @@ async function execute(){
         stepSlider.value++;
         console.log("Going from ", oldValue, "to ", stepSlider.value);
         oldValue = parseInt(stepSlider.value);
-        await sleep(baseWait/slider.value);
+        await sleep(baseWait/speedSlider.value);
         if(playPause.classList.contains("play")){
             await waitListener(playPause,"click");
         }

@@ -1,3 +1,8 @@
+This document contains old code and comments.
+Instead of commenting them out and having them take clutter code files,
+I move them here. I do this in case old uncommitted attempts can be salvaged or are better than new methods.
+
+
 // node.setAttributeNS(null, "draggable", "true");
 // node.addEventListener("dragstart", (event) => {
     //     event.dataTransfer.dropEffect = "move";
