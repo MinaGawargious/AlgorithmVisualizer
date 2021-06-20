@@ -95,12 +95,8 @@ function getLineProperties(x1, y1, x2, y2){
     let distance = Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
     if(distance > 4*h){
         let theta = Math.atan((x2-x1)/(y1-y2));
-        let dx = 4*h*Math.sin(theta); // The 4 is from the stroke width.
-        let dy = 4*h*Math.cos(theta);
-        if(y2 > y1){
-            dx = -dx;
-            dy = -dy;
-        }
+        let dx = y2 > y1 ? -4*h*Math.sin(theta) : 4*h*Math.sin(theta); // The 4 is from the stroke width.
+        let dy = y2 > y1 ? -4*h*Math.cos(theta) : 4*h*Math.cos(theta);
         return [x2-dx, y2+dy, "black", "arrowheadBlack_Far"]
     }
     return [x2, y2, "transparent", "arrowheadBlack_Near"]
@@ -108,12 +104,8 @@ function getLineProperties(x1, y1, x2, y2){
 
 function updateLabelPosition(x1, y1, x2, y2, label){
     let theta = Math.atan((x2-x1)/(y1-y2));
-    let dy = Math.sin(theta);
-    let dx = Math.cos(theta);
-    if(y2 > y1){
-        dx = -dx;
-        dy = -dy;
-    }
+    let dy = y2 > y1 ? -Math.sin(theta) : Math.sin(theta);
+    let dx = y2 > y1 ? -Math.cos(theta) : Math.cos(theta);
     let padding = 0.1;
     let labelWidth = label.getBBox().width, labelHeight = label.getBBox().height;
     let labelCenter = {"x": (x2+x1)/2 - dx*labelWidth*(0.5+padding), "y": (y2+y1)/2 - dy*labelHeight*(0.5 + padding)};
@@ -123,12 +115,8 @@ function updateLabelPosition(x1, y1, x2, y2, label){
 // Used to shift when we create a double connection and when we drag. (x1, y1) is source point, (x2, y2) is end point.
 function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel, x1, y1, x2, y2, id1, id2){
     let theta = Math.atan((x2-x1)/(y1-y2));
-    let dx = Math.cos(theta);
-    let dy = Math.sin(theta);
-    if(y2 > y1){
-        dx = -dx;
-        dy = -dy;
-    }
+    let dx = y2 > y1 ? -Math.cos(theta) : Math.cos(theta);
+    let dy = y2 > y1 ? -Math.sin(theta) : Math.sin(theta);
     if(directed){
         let [incomingX2, incomingY2, incomingArrowheadColor, incomingArrowhead] = getLineProperties(x1, y1, x2, y2);
         let [outgoingX2, outgoingY2, outgoingArrowheadColor, outgoingArrowhead] = getLineProperties(x2, y2, x1, y1);
@@ -287,9 +275,6 @@ addButton.addEventListener("click", (event) => {
 
 svg.addEventListener("mousemove", (event) => {
     event.preventDefault();
-    if(sourceNode){
-        // console.log(event);
-    }
     let X = event.offsetX;
     let Y = event.offsetY;
     if(newLine != null){
@@ -395,7 +380,6 @@ function BFS(){}
 
 // Unweighted. Directed or undirected. Focus on directed only for now, and we can add the option for an algorithm to be either directed or undirected later.
 
-//TODO: ADD CURRENT INFO TO CODETRACE.
 // Step-based with codetrace:
 async function DFS(node){
     // Initially, all nodes & edges undiscovered.
@@ -474,16 +458,3 @@ stepSlider.oninput = (event) => {
 function Dijkstra(){}
 
 function Bellman_Ford(){}
-
-// TODO: Types of edges/nodes:
-    //  Undiscovered (no change needed).
-    //  Discovered
-    //  Current
-// Additional for node:
-    //  Finished
-    
-// Possible clean up with classes and objects instead of functions so as to have object property for visited, current...
-
-/* Upon pressing start, we execute the function (like DFS) to find how many steps are needed. We set this as the max value of the step slider and enable it. The alternative of always having the slider enabled and recalculating DFS upon every new edge creation and adjusting the max value accordingly so the user can always slide through the algorithm is slow and wasteful. Must press start first to get number of steps. Then you can scrub through or pause then scrub if you don't want it to continue.*/
-
-// Step slider's value is next step to execute. Because of this, we need steps.length intervals, meaning steps.length + 1 discrete values. If we have 2 steps, slider has 3 discrete values. Going from 0 to 1 executes step 0. 1 to 2 executes step 1. If we only have 1 step, slider needs 1 interval or 2 values: before executing and after.

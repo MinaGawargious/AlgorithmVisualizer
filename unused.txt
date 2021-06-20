@@ -848,4 +848,18 @@ OLD COMMENTS:
 /****************************************
 // We can display where we are in code with method 1. However, it is hard to scrub through (especially backwards. we can probably run DFS first to get numSteps, then have a count variable incremented each step to scrub forwards, but backwards is impossible).
 // We can  allow for scrubbing through specific steps with method 2. With extra data, we can display where we are.
+
+
+// TODO: Types of edges/nodes:
+    //  Undiscovered (no change needed).
+    //  Discovered
+    //  Current
+// Additional for node:
+    //  Finished
+    
+// Possible clean up with classes and objects instead of functions so as to have object property for visited, current...
+
+/* Upon pressing start, we execute the function (like DFS) to find how many steps are needed. We set this as the max value of the step slider and enable it. The alternative of always having the slider enabled and recalculating DFS upon every new edge creation and adjusting the max value accordingly so the user can always slide through the algorithm is slow and wasteful. Must press start first to get number of steps. Then you can scrub through or pause then scrub if you don't want it to continue.*/
+
+// Step slider's value is next step to execute. Because of this, we need steps.length intervals, meaning steps.length + 1 discrete values. If we have 2 steps, slider has 3 discrete values. Going from 0 to 1 executes step 0. 1 to 2 executes step 1. If we only have 1 step, slider needs 1 interval or 2 values: before executing and after.
 ****************************************/
