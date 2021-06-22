@@ -7,7 +7,6 @@ function setAttributes(element, attributes){
     }
 }
 
-let nodeTextColor = "white";
 let numNodes = 0;
 let sourceNode = newLine = newWeightText = draggedItem = null;
 let selectedRect = document.createElementNS(svgns, "rect");
@@ -60,10 +59,10 @@ playPause.onclick = async (event) => { // async is syntactic sugar to return the
     if(playPause.classList.contains("play")) { // Currently paused. Now play.
         playPause.classList.remove("play");
         if(!started){
+            started = true;
             await func(startNode); // await pauses execution until the promise is resolved.
             execute();
         }
-        started = true;
         console.log("setting max to ", steps.length);
         stepSlider.setAttribute("max", steps.length);
         stepSlider.classList.remove("disableSelect", "disableElement");
@@ -74,7 +73,7 @@ playPause.onclick = async (event) => { // async is syntactic sugar to return the
 
 function isNumber(evt) {
     var charCode = evt.keyCode;
-    return ( (charCode <= 31) || (charCode >= 48 && charCode <= 57) )
+    return ( (charCode <= 31) || (charCode >= 48 && charCode <= 57) );
 }
 
 form = document.getElementsByTagName("form")[0];
@@ -95,17 +94,17 @@ function getLineProperties(x1, y1, x2, y2){
     let distance = Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
     if(distance > 4*h){
         let theta = Math.atan((x2-x1)/(y1-y2));
-        let dx = y2 > y1 ? -4*h*Math.sin(theta) : 4*h*Math.sin(theta); // The 4 is from the stroke width.
-        let dy = y2 > y1 ? -4*h*Math.cos(theta) : 4*h*Math.cos(theta);
-        return [x2-dx, y2+dy, "black", "arrowheadBlack_Far"]
+        let dx = (y2 > y1) ? -4*h*Math.sin(theta) : 4*h*Math.sin(theta); // The 4 is from the stroke width.
+        let dy = (y2 > y1) ? -4*h*Math.cos(theta) : 4*h*Math.cos(theta);
+        return [x2-dx, y2+dy, "black", "arrowheadBlack_Far"];
     }
-    return [x2, y2, "transparent", "arrowheadBlack_Near"]
+    return [x2, y2, "transparent", "arrowheadBlack_Near"];
 }
 
 function updateLabelPosition(x1, y1, x2, y2, label){
     let theta = Math.atan((x2-x1)/(y1-y2));
-    let dy = y2 > y1 ? -Math.sin(theta) : Math.sin(theta);
-    let dx = y2 > y1 ? -Math.cos(theta) : Math.cos(theta);
+    let dy = (y2 > y1) ? -Math.sin(theta) : Math.sin(theta);
+    let dx = (y2 > y1) ? -Math.cos(theta) : Math.cos(theta);
     let padding = 0.1;
     let labelWidth = label.getBBox().width, labelHeight = label.getBBox().height;
     let labelCenter = {"x": (x2+x1)/2 - dx*labelWidth*(0.5+padding), "y": (y2+y1)/2 - dy*labelHeight*(0.5 + padding)};
@@ -115,8 +114,8 @@ function updateLabelPosition(x1, y1, x2, y2, label){
 // Used to shift when we create a double connection and when we drag. (x1, y1) is source point, (x2, y2) is end point.
 function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel, x1, y1, x2, y2, id1, id2){
     let theta = Math.atan((x2-x1)/(y1-y2));
-    let dx = y2 > y1 ? -Math.cos(theta) : Math.cos(theta);
-    let dy = y2 > y1 ? -Math.sin(theta) : Math.sin(theta);
+    let dx = (y2 > y1) ? -Math.cos(theta) : Math.cos(theta);
+    let dy = (y2 > y1) ? -Math.sin(theta) : Math.sin(theta);
     if(directed){
         let [incomingX2, incomingY2, incomingArrowheadColor, incomingArrowhead] = getLineProperties(x1, y1, x2, y2);
         let [outgoingX2, outgoingY2, outgoingArrowheadColor, outgoingArrowhead] = getLineProperties(x2, y2, x1, y1);
@@ -189,7 +188,7 @@ function setWeighted(newWeight){
         if(!weighted && newWeightText != null){
             setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
         }
-        console.log((weighted ? "" : "un") + "weighted");
+        console.log("CHANGING TO " + (weighted ? "" : "un") + "weighted");
     }
 }
 
@@ -203,13 +202,19 @@ function setDirected(newDirected){
     }
 }
 
-let addButton = document.getElementsByClassName("add")[0];
-addButton.addEventListener("click", (event) => {
-    // Create new node.
+let current = 30;
+
+function createNewNode(random){
     let radius = window.innerWidth/30;
     let group = document.createElementNS(svgns, "g");
     let node = document.createElementNS(svgns, "circle");
-    setAttributes(node, {"r" : radius, "cx" :  Math.random() * window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("height").slice(0, -2), "style": "stroke-width:4", "id": numNodes});
+    if(random){
+        setAttributes(node, {"r": radius, "cx": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("height").slice(0, -2), "style": "stroke-width:4", "id": numNodes});
+    }else{
+        setAttributes(node, {"r": radius, "cx": current%window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": 30 + 30*Math.floor(current/window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2)), "style": "stroke-width:4", "id": numNodes});
+        current+=75;
+    }
+
     node.classList.add("node");
     if(numNodes == 0){
         node.classList.add("startNode");
@@ -217,10 +222,10 @@ addButton.addEventListener("click", (event) => {
     }
 
     let newText = document.createElementNS(svgns, "text");
-    setAttributes(newText, {"text-anchor": "middle", "x": parseFloat(node.cx.baseVal.value)-0.5, "y": parseFloat(node.cy.baseVal.value)+4, "font-weight": "bold", "font-size": "16", "fill": nodeTextColor, "class": "disableSelect"});
+    setAttributes(newText, {"text-anchor": "middle", "x": parseFloat(node.cx.baseVal.value)-0.5, "y": parseFloat(node.cy.baseVal.value)+4, "font-weight": "bold", "font-size": "16", "class": "disableSelect nodeText"});
     newText.textContent = numNodes;
-    adjacencyList[numNodes] = []
-    lines[numNodes++] = []
+    adjacencyList[numNodes] = [];
+    lines[numNodes++] = [];
     group.appendChild(node);
     group.appendChild(newText);
     svg.appendChild(group);
@@ -238,13 +243,13 @@ addButton.addEventListener("click", (event) => {
             newWeightText.textContent = "1";
             newWeightText.addEventListener("click", (event) => {
                 selected = event.target; // We can reference newWeightText when setting fields upon creation because it's not null then. Upon click, however, it is null, so to reference this unique text field again, use event.target.
-                console.log(selected)
+                console.log(selected);
                 selected.textContent += "|";
               
                 setAttributes(selectedRect, {"x": parseFloat(selected.getAttribute("x")) - selected.getBBox().width/2, "y": parseFloat(selected.getAttribute("y")) - selected.getBBox().height/2, "width": selected.getBBox().width, "height": selected.getBBox().height});
                 svg.appendChild(selectedRect);
                 editLabel(selected);
-            })
+            });
 
             // LABELS MUST BE IN MEMORY AT ALL TIMES IN ORDER TO RESTORE AT CORRECT SPOT AND WEIGHTS WHEN GOING TO A WEIGHTED ALGORITHM.
             setAttributes(newWeightText, {"x": node.cx.baseVal.value, "y": node.cy.baseVal.value});
@@ -255,6 +260,7 @@ addButton.addEventListener("click", (event) => {
                 setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
             }
         }else if(sourceNode != node && !adjacencyList[sourceNode.id].includes(node.id) && (directed || !adjacencyList[node.id].includes(sourceNode.id))){ // Second node to establish connection. Make sure we don't make an edge to ourselves or a duplicate edge. Also only allow edge in undirected graph if no edge between these two nodes exists.
+            newLine.id = `edge${sourceNode.id}_${node.id}`;
             playPause.classList.remove("disableElement", "disableSelect");
             adjacencyList[sourceNode.id].push(node.id);
             lines[sourceNode.id].push({lineObject: newLine, label: newWeightText});
@@ -271,7 +277,38 @@ addButton.addEventListener("click", (event) => {
             newLine = sourceNode = newWeightText = null;
         }
     });
+    group.addEventListener("mouseover", (event) => { // mouseenter?
+        if(started && stepSlider.value == steps.length){ // Execution done.
+            updateHighlight(true, node);
+        }
+    });
+    group.addEventListener("mouseleave", (event) => {
+        if(started && stepSlider.value == steps.length){
+            console.log("leaving ", node.id);
+            updateHighlight(false, node);
+        }
+    });
+}
+
+let addButton = document.getElementsByClassName("add")[0];
+addButton.addEventListener("click", (event) => {
+    createNewNode(true);
 });
+
+// I may consider changing this for speed: have an array of length numNodes, with each node's parent id, DOM element, and edge element from parent to itself. 
+// This avoids a document lookup at the expense of more memory used to store the DOM elements.
+function updateHighlight(highlight, node){
+    // console.log((highlight ? "H" : "Unh") + "ighlighting node ", node.id);
+    // Highlight or unhighlight all nodes and edges from startNode to NODE.
+    highlight ? node.classList.add("highlightedNode") : node.classList.remove("highlightedNode");
+    if(node != startNode && node.hasAttribute("parent")){
+        let parentID = node.getAttribute("parent");
+        let incomingEdge = document.getElementById(`edge${parentID}_${node.id}`);
+        highlight ? incomingEdge.classList.add("highlightedEdge") : incomingEdge.classList.remove("highlightedEdge");
+        let parentNode = document.getElementById(parentID);
+        updateHighlight(highlight, parentNode);
+    }
+}
 
 svg.addEventListener("mousemove", (event) => {
     event.preventDefault();
@@ -285,7 +322,7 @@ svg.addEventListener("mousemove", (event) => {
         setAttributes(draggedItem.parentElement, {"x": X, "y": Y});
         updateAllLines(draggedItem);
     }
-})
+});
 
 function doneEditing(){
     if(svg.contains(selectedRect)){
@@ -306,10 +343,10 @@ svg.addEventListener("mousedown", (event) => {
         draggedItem = event.target;
     }
     doneEditing();
-})
+});
 svg.addEventListener("mouseup", (event) => {
     draggedItem = null;
-})
+});
 
 // Called when we edit a label's text to adjust the position.
 function editLabel(label){
@@ -329,7 +366,11 @@ function editLabel(label){
 }
 
 document.addEventListener("keydown", (event) => {
-    if(event.key == "Escape" || event.key == "Enter"){
+    if(event.key == "t"){ // Quickly create 100 test nodes.
+        for(let i = 0; i < 100; i++){
+            createNewNode(false);
+        }
+    }else if(event.key == "Escape" || event.key == "Enter"){
         for (let element of [newLine, newWeightText]){
             if(element != null && svg.contains(element)){
                 svg.removeChild(element);
@@ -354,9 +395,11 @@ document.addEventListener("keydown", (event) => {
             editLabel(selected);
         }
     }else if(event.key == "ArrowRight"){
-        // Step forward.
+        // Step forward. Pause execution.
+        playPause.classList.add("play");
     }else if(event.key == "ArrowLeft"){
-        // Step back.
+        // Step back. Pause execution.
+        playPause.classList.add("play");
     }else if(event.key == " "){
         // Toggle play/pause.
     }
@@ -397,6 +440,7 @@ async function DFS(node){
         // Go on to neighbor node:
         let neighbor = document.getElementById(adjacencyList[node.id][i]);
         if(!discovered.includes(neighbor.id)){
+            neighbor.setAttribute("parent", node.id);
             steps.push({"elements": [edge, neighbor], "actions": ["remove", "add"], "classList": ["currentEdge", "goingTo"], "index": 2});
             await DFS(neighbor);
             steps[steps.length-1] = {"elements": [neighbor, neighbor, node], "actions": ["remove", "add", "add"], "classList": ["currentNode", "finishedNode", "currentNode"], "index": 4}; // Override prior entry to make node current.

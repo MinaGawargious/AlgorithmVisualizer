@@ -18,6 +18,7 @@
     --startBorderColor: lightblue;
     /* --codetrace-code-color: #004fff; */
   
+    --nodeTextColor: white;
     --currentNodeFillColor: green;
     --currentNodeBorderColor: transparent;
     --finishedNodeFillColor: red;
@@ -27,6 +28,10 @@
 
     --currentEdgeStroke: green;
     --discoveredEdgeStroke: red;
+
+    --highlightedEdgeStroke: blue;
+    --highlightedNodeFillColor: blue;
+    --highlightedNodeBorderColor: #c6d8e3;
 }
   
 body{
@@ -229,6 +234,9 @@ label{
     fill: var(--fillColor);
     stroke: var(--borderColor);
 }
+.nodeText{
+    fill: var(--nodeTextColor);
+}
   
 .startNode{
     fill: var(--startFillColor);
@@ -264,6 +272,14 @@ label{
 }
 .currentEdge{
     stroke: var(--currentEdgeStroke);
+}
+
+.highlightedEdge{
+    stroke: var(--highlightedEdgeStroke);
+}
+.highlightedNode{
+    fill: var(--highlightedNodeFillColor);
+    stroke: var(--highlightedNodeBorderColor);
 }
 
 .slider{
