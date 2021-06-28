@@ -12,7 +12,7 @@ let sourceNode = newLine = newWeightText = draggedItem = null;
 let selectedRect = document.createElementNS(svgns, "rect");
 setAttributes(selectedRect, {"fill": "none", "stroke": "blue"});
 let selected = null;
-let weighted = true, directed = true;
+let weighted = false, directed = true;
 
 let adjacencyList = {}; // startID: [endIds]
 let lines = {}; // startID: [lineObject, label]
@@ -20,7 +20,7 @@ let func = DFS;
 let code = document.getElementById("DFSCode");
 let startNode = null;
 
-let steps = []; // {elements: [], actions: [], classList: []}
+let steps = []; // {elements: [], actions: [], classList: [], print: String, clearCurrent: Bool}
 let discovered = [];
 
 let algorithms = document.querySelectorAll(".algorithm");
@@ -54,13 +54,13 @@ let started = false;
 let stepSlider = document.getElementById("stepSlider");
 
 playPause = document.getElementsByClassName("playPause")[0];
-playPause.onclick = async (event) => { // async is syntactic sugar to return the values as a resolved promise.
+playPause.onclick = (event) => {
     event.preventDefault();
     if(playPause.classList.contains("play")) { // Currently paused. Now play.
         playPause.classList.remove("play");
         if(!started){
             started = true;
-            await func(startNode); // await pauses execution until the promise is resolved.
+            func(startNode);
             execute();
         }
         console.log("setting max to ", steps.length);
@@ -202,7 +202,7 @@ function setDirected(newDirected){
     }
 }
 
-let current = 30;
+let currentPosition = 30;
 
 function createNewNode(random){
     let radius = window.innerWidth/30;
@@ -211,8 +211,8 @@ function createNewNode(random){
     if(random){
         setAttributes(node, {"r": radius, "cx": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("height").slice(0, -2), "style": "stroke-width:4", "id": numNodes});
     }else{
-        setAttributes(node, {"r": radius, "cx": current%window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": 30 + 30*Math.floor(current/window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2)), "style": "stroke-width:4", "id": numNodes});
-        current+=75;
+        setAttributes(node, {"r": radius, "cx": currentPosition%window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": 30 + 30*Math.floor(currentPosition/window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2)), "style": "stroke-width:4", "id": numNodes});
+        currentPosition+=75;
     }
 
     node.classList.add("node");
@@ -424,10 +424,10 @@ function BFS(){}
 // Unweighted. Directed or undirected. Focus on directed only for now, and we can add the option for an algorithm to be either directed or undirected later.
 
 // Step-based with codetrace:
-async function DFS(node){
+function DFS(node){
     // Initially, all nodes & edges undiscovered.
     // Highlight node as current:
-    steps.push({"elements": [node, node, node], "actions": ["add", "add", "remove"], "classList": ["discoveredNode", "currentNode", "goingTo"], "index": 0});
+    steps.push({"elements": [node, node, node], "actions": ["add", "add", "remove"], "classList": ["discoveredNode", "currentNode", "goingTo"], "index": 0, "print": `DFS(${node.id})`, "clearCurrent": true});
 
     discovered.push(node.id);
     // Loop through the edges:
@@ -435,30 +435,40 @@ async function DFS(node){
         let edge = lines[node.id][i].lineObject;
 
         // Dehighlight node, highlight current edge.
-        steps.push({"elements": [node, edge, edge], "actions": ["remove", "add", "add"], "classList": ["currentNode", "discoveredEdge", "currentEdge"], "index": 1});
+        steps.push({"elements": [node, edge, edge], "actions": ["remove", "add", "add"], "classList": ["currentNode", "discoveredEdge", "currentEdge"], "index": 1, "print": `Try edge ${node.id} -> ${adjacencyList[node.id][i]}`, "clearCurrent": true});
 
         // Go on to neighbor node:
         let neighbor = document.getElementById(adjacencyList[node.id][i]);
         if(!discovered.includes(neighbor.id)){
             neighbor.setAttribute("parent", node.id);
-            steps.push({"elements": [edge, neighbor], "actions": ["remove", "add"], "classList": ["currentEdge", "goingTo"], "index": 2});
-            await DFS(neighbor);
-            steps[steps.length-1] = {"elements": [neighbor, neighbor, node], "actions": ["remove", "add", "add"], "classList": ["currentNode", "finishedNode", "currentNode"], "index": 4}; // Override prior entry to make node current.
+            steps.push({"elements": [edge, neighbor], "actions": ["remove", "add"], "classList": ["currentEdge", "goingTo"], "index": 2, "print": `Node ${neighbor.id} unvisited`, "clearCurrent": false});
+            DFS(neighbor);
+            steps[steps.length-1] = {"elements": [neighbor, neighbor, node], "actions": ["remove", "add", "add"], "classList": ["currentNode", "finishedNode", "currentNode"], "index": 4, "print": `Done with DFS(${neighbor.id}). Back to DFS(${node.id})`, "clearCurrent": true}; // Override prior entry to make node current.
         }else{
             // Node already discovered, so this edge will not actually be explored.
-            steps.push({"elements": [edge, node], "actions": ["remove", "add"], "classList": ["currentEdge", "currentNode"], "index": 3});
+            steps.push({"elements": [edge, node], "actions": ["remove", "add"], "classList": ["currentEdge", "currentNode"], "index": 3, "print": `Node ${neighbor.id} already visited. Back to node ${node.id}`, "clearCurrent": true});
         }
     }
    
     // Node finished:
-    steps.push({"elements": [node, node], "actions": ["remove", "add"], "classList": ["currentNode", "finishedNode"], "index": 4});  // If node is startNode, this will not be overridden. Mark node as finished.
+    steps.push({"elements": [node, node], "actions": ["remove", "add"], "classList": ["currentNode", "finishedNode"], "index": 4, "print": `Done with DFS(${node.id})`, "clearCurrent": true});  // If node is startNode, this will not be overridden. Mark node as finished.
     return Promise.resolve();
 }
+
+let current = document.getElementById("current");
 
 function doStep(step){
     if(step > 0){
         code.getElementsByTagName("p")[steps[step-1]["index"]].removeAttribute("style");
     }
+    
+    if(steps[step]["clearCurrent"]){
+        current.innerHTML = "";
+    }
+    let newCurrentText = document.createElement("p");
+    newCurrentText.innerText = steps[step]["print"];
+    current.appendChild(newCurrentText);
+
     code.getElementsByTagName("p")[steps[step]["index"]].setAttribute("style", "background:green;");
     for(let j = 0; j < steps[step]["elements"].length; j++){
         if(steps[step]["actions"][j] == "add"){
@@ -473,14 +483,14 @@ let oldValue = 0;
 let baseWait = 2500;
 let speedSlider = document.getElementById("speedSlider");
 
-async function execute(){
+async function execute(){ // async is syntactic sugar to return the values as a resolved promise.
     while(stepSlider.value < steps.length){
         // Execute step at index stepSlider.value.
         doStep(stepSlider.value);
         stepSlider.value++;
-        console.log("Going from ", oldValue, "to ", stepSlider.value);
+        // console.log("Going from ", oldValue, "to ", stepSlider.value);
         oldValue = parseInt(stepSlider.value);
-        await sleep(baseWait/speedSlider.value);
+        await sleep(baseWait/speedSlider.value); // await pauses execution until the promise is resolved.
         if(playPause.classList.contains("play")){
             await waitListener(playPause,"click");
         }

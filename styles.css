@@ -5,6 +5,7 @@
     --play-color: #c6d8e3;
     --header-color: #c6d8e3;
     --codetrace-code-color: #c6d8e3;
+    --codetrace-current-color: lightgreen;
     --add-hover-color: pink;
     /* --play-color: #004fff; */
     --play-hover-color: red;
@@ -218,13 +219,13 @@ label{
     opacity: 0.7;
 }
 #codetrace p{
-    padding: 0px 0px 5px 5px;
+    padding: 0px 10px 3px 5px;
     margin: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     /* background: red; */
 }
 #codetrace #current{
-    background: rgba(52, 26, 20, 0.4);
+    background: var(--codetrace-current-color);
 }
 #codetrace #code p{
     background: var(--codetrace-code-color);
