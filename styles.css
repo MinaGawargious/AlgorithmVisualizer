@@ -81,7 +81,6 @@ header ul li ul{
     display: block;
     width: 100%;
     /* transition: 0.5s; */
-    /* change to 0 and hidden */
     opacity: 0;
     visibility: hidden;
 }

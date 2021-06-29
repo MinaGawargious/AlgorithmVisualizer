@@ -206,7 +206,7 @@ let currentPosition = 30;
 
 function createNewNode(random){
     let radius = window.innerWidth/30;
-    let group = document.createElementNS(svgns, "g");
+    let nodeTextGroup = document.createElementNS(svgns, "g");
     let node = document.createElementNS(svgns, "circle");
     if(random){
         setAttributes(node, {"r": radius, "cx": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("height").slice(0, -2), "style": "stroke-width:4", "id": numNodes});
@@ -226,11 +226,11 @@ function createNewNode(random){
     newText.textContent = numNodes;
     adjacencyList[numNodes] = [];
     lines[numNodes++] = [];
-    group.appendChild(node);
-    group.appendChild(newText);
-    svg.appendChild(group);
+    nodeTextGroup.appendChild(node);
+    nodeTextGroup.appendChild(newText);
+    svg.appendChild(nodeTextGroup);
 
-    group.addEventListener("click", (event) => {
+    nodeTextGroup.addEventListener("click", (event) => {
         if(sourceNode == null){
             sourceNode = node;
             newLine = document.createElementNS(svgns, "line");
@@ -253,9 +253,11 @@ function createNewNode(random){
 
             // LABELS MUST BE IN MEMORY AT ALL TIMES IN ORDER TO RESTORE AT CORRECT SPOT AND WEIGHTS WHEN GOING TO A WEIGHTED ALGORITHM.
             setAttributes(newWeightText, {"x": node.cx.baseVal.value, "y": node.cy.baseVal.value});
-            svg.appendChild(newLine);
+            let lineWeightGroup = document.createElementNS(svgns, "g");
+            lineWeightGroup.appendChild(newLine);
             // There are two ways to add weight options. The first: remove labels from the HTML entirely. The second: simply make them invisible by setting opacity to 0. The first option also requires looping through all nodes as well to adjust label positions, and proved to be MUCH slower in dense graphs. So, the opacity option is better.
-            svg.appendChild(newWeightText);
+            lineWeightGroup.appendChild(newWeightText);
+            svg.appendChild(lineWeightGroup);
             if(!weighted){
                 setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
             }
@@ -277,12 +279,12 @@ function createNewNode(random){
             newLine = sourceNode = newWeightText = null;
         }
     });
-    group.addEventListener("mouseover", (event) => { // mouseenter?
+    nodeTextGroup.addEventListener("mouseover", (event) => { // mouseenter?
         if(started && stepSlider.value == steps.length){ // Execution done.
             updateHighlight(true, node);
         }
     });
-    group.addEventListener("mouseleave", (event) => {
+    nodeTextGroup.addEventListener("mouseleave", (event) => {
         if(started && stepSlider.value == steps.length){
             console.log("leaving ", node.id);
             updateHighlight(false, node);
@@ -319,7 +321,6 @@ svg.addEventListener("mousemove", (event) => {
     }else if(draggedItem != null && draggedItem.tagName == "circle"){
         setAttributes(draggedItem, {"cx": X, "cy": Y});
         setAttributes(draggedItem.nextElementSibling, {"x": X-0.5, "y": Y+4});
-        setAttributes(draggedItem.parentElement, {"x": X, "y": Y});
         updateAllLines(draggedItem);
     }
 });
@@ -371,10 +372,8 @@ document.addEventListener("keydown", (event) => {
             createNewNode(false);
         }
     }else if(event.key == "Escape" || event.key == "Enter"){
-        for (let element of [newLine, newWeightText]){
-            if(element != null && svg.contains(element)){
-                svg.removeChild(element);
-            }
+        if(newWeightText != null){
+            svg.removeChild(newWeightText.parentElement);
         }
         doneEditing();
         sourceNode = newLine = newWeightText = null;
