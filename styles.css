@@ -26,8 +26,6 @@
     --finishedNodeBorderColor: transparent;
     --discoveredNodeFillColor: rgb(215, 210, 20);
     --discoveredNodeBorderColor: transparent;
-    --comingFromNodeFillColor: transparent;
-    --comingFromNodeBorderColor: orange;
 
     --currentEdgeStroke: green;
     --discoveredEdgeStroke: red;
@@ -247,10 +245,6 @@ label{
 .discoveredNode{
     fill: var(--discoveredNodeFillColor);
     stroke: var(--discoveredNodeFillColor);
-}
-.comingFromNode{
-    fill: var(--comingFromNodeFillColor);
-    stroke: var(--comingFromNodeBorderColor);
 }
 .finishedNode{
     fill: var(--finishedNodeFillColor);

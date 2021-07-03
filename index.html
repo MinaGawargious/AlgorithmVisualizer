@@ -1,57 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <title>Algorithm Visualizer</title>
-   <link rel="stylesheet" href="styles.css">
-   <meta name="viewport" content="width=device-width,initial-scale=1.0" charset="utf-8">
+    <title>Algorithm Visualizer</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" charset="utf-8">
 </head>
 <body>
-   <header>
-       <ul>
-           <li><a href="#" class="DFS algorithm" weighted="false" directed="true">DFS</a></li>
-           <li><a href="#" class="BFS algorithm" weighted="false" directed="true">BFS</a></li>
-           <li id="logo">Graph Visualizer</li>
-           <li><a href="#" class="Dijkstra algorithm">Dijkstra</a></li>
-           <li><a href="#" class="Bellman_Ford algorithm">Bellman-Ford</a></li>
-       </ul>
-   </header>
-   <section class="content">
-       <svg></svg>
-       <form onkeypress="return isNumber(event)">
-           <input type="text" name="startField" id="startField" pattern= "^[0-9]*$" maxlength="3" placeholder="start">
-       </form>
-       <div class="playPause play disableSelect disableElement">
-           <span class="bar bar-1"></span>
-           <span class="bar bar-2"></span>
-       </div>
-       <div class="add">
-           <!-- <span class="addbar-1"></span> -->
-           <!-- <span class="addbar-2"></span> -->
-       </div>
-       <input type="range" min="0" value="0" class = "slider disableSelect disableElement" id="stepSlider">
-       <input type="range" min="1" max="10" value="1" class = "slider" id="speedSlider">
-       <div id="codetrace" class="disableSelect">
-           <div id="current"></div>
-           <div id="code">
-               <div id="BFSCode">
-                   <p>BFS(u):</p>
-                   <p>&emsp;Q = {u}</p>
-                   <p>&emsp;while Q is not empty:</p>
-                   <p>&emsp;&emsp;v = Q.pop()</p>
-                   <p>&emsp;&emsp;for each edge (v, w):</p>
-                   <p>&emsp;&emsp;&emsp;if w not discovered, Q.push(w)</p>
-                   <p>&emsp;&emsp;&emsp;else, ignore w</p>
-               </div>
-               <!-- <div id="DFSCode">
-                   <p>DFS(u):</p>
-                   <p>&emsp;for each edge (u,v):</p>
-                   <p>&emsp;&emsp;if node v not discovered, DFS(v)</p>
-                   <p>&emsp;&emsp;else, back to node u</p>
-                   <p>&emsp;return</p>
-               </div> -->
-           </div>
-       </div>
-   </section>
+    <header>
+        <ul>
+            <li><a href="#" class="DFS algorithm" weighted="false" directed="true">DFS</a></li>
+            <li><a href="#" class="BFS algorithm" weighted="false" directed="true">BFS</a></li>
+            <li id="logo">Graph Visualizer</li>
+            <li><a href="#" class="Dijkstra algorithm" weighted="true" directed="true">Dijkstra</a></li>
+            <li><a href="#" class="Bellman_Ford algorithm">Bellman-Ford</a></li>
+        </ul>
+    </header>
+    <section class="content">
+        <svg></svg>
+        <form onkeypress="return isNumber(event)">
+            <input type="text" name="startField" id="startField" pattern= "^[0-9]*$" maxlength="3" placeholder="start">
+        </form>
+        <div class="playPause play disableSelect disableElement">
+            <span class="bar bar-1"></span>
+            <span class="bar bar-2"></span>
+        </div>
+        <div class="add">
+            <!-- <span class="addbar-1"></span> -->
+            <!-- <span class="addbar-2"></span> -->
+        </div>
+        <input type="range" min="0" value="0" class = "slider disableSelect disableElement" id="stepSlider">
+        <input type="range" min="1" max="10" value="1" class = "slider" id="speedSlider">
+        <div id="codetrace" class="disableSelect">
+            <div id="current"></div>
+            <div id="code">
+                <div id="BFSCode">
+                    <p>BFS(u):</p>
+                    <p>&emsp;Q = {u}</p>
+                    <p>&emsp;while Q is not empty:</p>
+                    <p>&emsp;&emsp;v = Q.pop()</p>
+                    <p>&emsp;&emsp;for each edge (v, w):</p>
+                    <p>&emsp;&emsp;&emsp;if w not discovered, Q.push(w)</p>
+                    <p>&emsp;&emsp;&emsp;else, ignore w</p>
+                </div>
+                <!-- <div id="DFSCode">
+                    <p>DFS(u):</p>
+                    <p>&emsp;for each edge (u,v):</p>
+                    <p>&emsp;&emsp;if node v not discovered, DFS(v)</p>
+                    <p>&emsp;&emsp;else, back to node u</p>
+                    <p>&emsp;return</p>
+                </div> -->
+            </div>
+        </div>
+    </section>
 </body>
 <script src="main.js"></script>
 </html>

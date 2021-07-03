@@ -123,7 +123,7 @@ function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel
     if(directed){
         let [incomingX2, incomingY2, incomingArrowheadColor, incomingArrowhead] = getLineProperties(x1, y1, x2, y2);
         let [outgoingX2, outgoingY2, outgoingArrowheadColor, outgoingArrowhead] = getLineProperties(x2, y2, x1, y1);
-        
+
         setAttributes(incoming, {"x1": x1 - w*dx, "y1": y1 - w*dy, "x2": incomingX2 - w*dx, "y2": incomingY2 - w*dy, "stroke": incomingArrowheadColor, "marker-end": `url(#${incomingArrowhead})`});
         setAttributes(outgoing, {"x1": x2 + w*dx, "y1": y2 + w*dy, "x2": outgoingX2 + w*dx, "y2": outgoingY2 + w*dy, "stroke": outgoingArrowheadColor, "marker-end": `url(#${outgoingArrowhead})`});
         setAttributes(incomingLabel, {"pointer-events": weighted ? "auto" : "none", "opacity": weighted ? 1 : 0});
@@ -422,40 +422,40 @@ function waitListener(Element, ListenerName) {
 }
 
 function BFS(node){
-// Nodes:
-    // discoveredNode
-    // currentNode
-    // goingTo
-    // finishedNode
-    // comingFrom
-// Edges:
-    // discoveredEdge
-    // currentEdge
+    // I like the visualization, but some considerations/notes:
+        // Consider a: highlighting current node and current edge, and/or b: highlight neighbor node and current edge. Might make it clearer.
+        // Consider using the goingTo class instead of discovered to differentiate between frontier nodes and currentNode when off exploring and edge and removing the currentNode class (when we highlight index 4)
+        // Conisder only highlighting index 1, not both 0 and 1 initially for cleanliness. 
     let Q = [node.id];
     discovered = [node.id];
-    steps.push({"elements": [node, node], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"], "indices": [1], "print": `BFS(${node.id}):\nQ = {${Q}}`, "clearCurrent": true});
-    
+    steps.push({"elements": [node, node], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"], "indices": [0, 1], "print": `BFS(${node.id}):\nInitialize Q = {${Q}}`, "clearCurrent": true}); // Done.
+    let priorNode = null;
+    let currentNode = null;
     while(Q.length > 0){
-        steps.push({"elements": [], "actions": [], "classList": [], "indices": [2], "print": `Q = {${Q}} is not empty`, "clearCurrent": true});
-
         let currentNodeId = Q.shift();
-        let currentNode = svg.getElementById(currentNodeId);
-        steps.push({"elements": [], "actions": [], "classList": [], "indices": [3], "print": `Exploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
+        currentNode = svg.getElementById(currentNodeId);
+        if(priorNode == null){
+            steps.push({"elements": [currentNode, currentNode], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true}); // Done.
+        }else{
+            steps.push({"elements": [currentNode, currentNode, priorNode, priorNode], "actions": ["add", "add", "remove", "add"], "classList": ["discoveredNode", "currentNode", "currentNode", "finishedNode"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true}); // Done.
+        }
 
         for(let neighborId of adjacencyList[currentNodeId]){
             let edge = svg.getElementById(`edge${currentNodeId}_${neighborId}`);
-            steps.push({"elements": [], "actions": [], "classList": [], "indices": [4], "print": `Try edge ${currentNodeId} -> ${neighborId}`, "clearCurrent": true});
+            steps.push({"elements": [edge, edge, currentNode], "actions": ["add", "add", "remove"], "classList": ["discoveredEdge", "currentEdge", "currentNode"], "indices": [4], "print": `Try edge ${currentNodeId} -> ${neighborId}`, "clearCurrent": true});
             if(!discovered.includes(neighborId)){
                 let neighbor = svg.getElementById(neighborId);
                 neighbor.setAttribute("parent", currentNodeId);
-                steps.push({"elements": [], "actions": [], "classList": [], "indices": [5], "print": `Node ${neighborId} not discovered. Q.push(${neighborId})`, "clearCurrent": false});
+                steps.push({"elements": [neighbor, currentNode, edge], "actions": ["add", "add", "remove"], "classList": ["discoveredNode", "currentNode", "currentEdge"], "indices": [5], "print": `Node ${neighborId} not discovered. Q.push(${neighborId})`, "clearCurrent": false});
                 Q.push(neighborId);
                 discovered.push(neighborId);
             }else{ // Ignore.
-                steps.push({"elements": [], "actions": [], "classList": [], "indices": [6], "print": `Node ${neighborId} already discovered. Skip it`, "clearCurrent": false});
+                steps.push({"elements": [currentNode, edge], "actions": ["add", "remove"], "classList": ["currentNode", "currentEdge"], "indices": [6], "print": `Node ${neighborId} already discovered. Skip it`, "clearCurrent": false});
             }
         }
+        priorNode = currentNode;
     }
+    steps.push({"elements": [currentNode, currentNode], "actions": ["remove", "add"], "classList": ["currentNode", "finishedNode"], "indices": [], "print": `BFS(${node.id}) Done`, "clearCurrent": true});
 }
 
 // Step-based with codetrace:
