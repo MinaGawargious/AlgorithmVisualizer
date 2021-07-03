@@ -1,5 +1,5 @@
 :root {
-    --svg-background-color: #505050; /*#323139, #212126, #423940 */
+    --svg-background-color: rgba(40, 44, 52, 0.925); /*#323139, #212126, #423940 */
 
     --add-color: #c6d8e3;
     --play-color: #c6d8e3;
@@ -24,8 +24,10 @@
     --currentNodeBorderColor: transparent;
     --finishedNodeFillColor: red;
     --finishedNodeBorderColor: transparent;
-    --discoveredNodeFillColor: yellow;
+    --discoveredNodeFillColor: rgb(215, 210, 20);
     --discoveredNodeBorderColor: transparent;
+    --comingFromNodeFillColor: transparent;
+    --comingFromNodeBorderColor: orange;
 
     --currentEdgeStroke: green;
     --discoveredEdgeStroke: red;
@@ -245,6 +247,10 @@ label{
 .discoveredNode{
     fill: var(--discoveredNodeFillColor);
     stroke: var(--discoveredNodeFillColor);
+}
+.comingFromNode{
+    fill: var(--comingFromNodeFillColor);
+    stroke: var(--comingFromNodeBorderColor);
 }
 .finishedNode{
     fill: var(--finishedNodeFillColor);

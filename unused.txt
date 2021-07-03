@@ -862,4 +862,7 @@ OLD COMMENTS:
 /* Upon pressing start, we execute the function (like DFS) to find how many steps are needed. We set this as the max value of the step slider and enable it. The alternative of always having the slider enabled and recalculating DFS upon every new edge creation and adjusting the max value accordingly so the user can always slide through the algorithm is slow and wasteful. Must press start first to get number of steps. Then you can scrub through or pause then scrub if you don't want it to continue.*/
 
 // Step slider's value is next step to execute. Because of this, we need steps.length intervals, meaning steps.length + 1 discrete values. If we have 2 steps, slider has 3 discrete values. Going from 0 to 1 executes step 0. 1 to 2 executes step 1. If we only have 1 step, slider needs 1 interval or 2 values: before executing and after.
+
+Before DFS:
+// Unweighted. Directed or undirected. Focus on directed only for now, and we can add the option for an algorithm to be either directed or undirected later.
 ****************************************/

@@ -16,8 +16,9 @@ let weighted = false, directed = true;
 
 let adjacencyList = {}; // startID: [endIds]
 let lines = {}; // startID: [lineObject, label]
-let func = DFS;
-let code = document.getElementById("DFSCode");
+let func = BFS;
+let code = document.getElementById(`${func.name}Code`);
+let codeParagraphs = code.getElementsByTagName("p");
 let startNode = null;
 
 let steps = []; // {elements: [], actions: [], classList: [], print: String, clearCurrent: Bool}
@@ -26,8 +27,11 @@ let discovered = [];
 let algorithms = document.querySelectorAll(".algorithm");
 for(let algorithm of algorithms){
     algorithm.addEventListener("click", () => {
+        steps = [];
+        discovered = [];
         func = window[algorithm.classList[0]];
         code = document.getElementById(func.name+"Code");
+        codeParagraphs = code.getElementsByTagName("p");
         setWeighted(algorithm.getAttribute("weighted") == "true");
         setDirected(algorithm.getAttribute("directed") == "true");
         console.log(algorithm);
@@ -83,7 +87,7 @@ form.onsubmit = (event) => {
     event.preventDefault();
     if(start.value < numNodes){
         startNode.classList.remove("startNode");
-        let newStart = document.getElementById(parseInt(start.value));
+        let newStart = svg.getElementById(parseInt(start.value));
         newStart.classList.add("startNode");
         startNode = newStart;
     }
@@ -119,10 +123,9 @@ function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel
     if(directed){
         let [incomingX2, incomingY2, incomingArrowheadColor, incomingArrowhead] = getLineProperties(x1, y1, x2, y2);
         let [outgoingX2, outgoingY2, outgoingArrowheadColor, outgoingArrowhead] = getLineProperties(x2, y2, x1, y1);
-
+        
         setAttributes(incoming, {"x1": x1 - w*dx, "y1": y1 - w*dy, "x2": incomingX2 - w*dx, "y2": incomingY2 - w*dy, "stroke": incomingArrowheadColor, "marker-end": `url(#${incomingArrowhead})`});
         setAttributes(outgoing, {"x1": x2 + w*dx, "y1": y2 + w*dy, "x2": outgoingX2 + w*dx, "y2": outgoingY2 + w*dy, "stroke": outgoingArrowheadColor, "marker-end": `url(#${outgoingArrowhead})`});
-
         setAttributes(incomingLabel, {"pointer-events": weighted ? "auto" : "none", "opacity": weighted ? 1 : 0});
         setAttributes(outgoingLabel, {"pointer-events": weighted ? "auto" : "none", "opacity": weighted ? 1 : 0});
     }else{
@@ -305,9 +308,9 @@ function updateHighlight(highlight, node){
     highlight ? node.classList.add("highlightedNode") : node.classList.remove("highlightedNode");
     if(node != startNode && node.hasAttribute("parent")){
         let parentID = node.getAttribute("parent");
-        let incomingEdge = document.getElementById(`edge${parentID}_${node.id}`);
+        let incomingEdge = svg.getElementById(`edge${parentID}_${node.id}`);
         highlight ? incomingEdge.classList.add("highlightedEdge") : incomingEdge.classList.remove("highlightedEdge");
-        let parentNode = document.getElementById(parentID);
+        let parentNode = svg.getElementById(parentID);
         updateHighlight(highlight, parentNode);
     }
 }
@@ -418,47 +421,80 @@ function waitListener(Element, ListenerName) {
     });
 }
 
-function BFS(){}
+function BFS(node){
+// Nodes:
+    // discoveredNode
+    // currentNode
+    // goingTo
+    // finishedNode
+    // comingFrom
+// Edges:
+    // discoveredEdge
+    // currentEdge
+    let Q = [node.id];
+    discovered = [node.id];
+    steps.push({"elements": [node, node], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"], "indices": [1], "print": `BFS(${node.id}):\nQ = {${Q}}`, "clearCurrent": true});
+    
+    while(Q.length > 0){
+        steps.push({"elements": [], "actions": [], "classList": [], "indices": [2], "print": `Q = {${Q}} is not empty`, "clearCurrent": true});
 
-// Unweighted. Directed or undirected. Focus on directed only for now, and we can add the option for an algorithm to be either directed or undirected later.
+        let currentNodeId = Q.shift();
+        let currentNode = svg.getElementById(currentNodeId);
+        steps.push({"elements": [], "actions": [], "classList": [], "indices": [3], "print": `Exploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
+
+        for(let neighborId of adjacencyList[currentNodeId]){
+            let edge = svg.getElementById(`edge${currentNodeId}_${neighborId}`);
+            steps.push({"elements": [], "actions": [], "classList": [], "indices": [4], "print": `Try edge ${currentNodeId} -> ${neighborId}`, "clearCurrent": true});
+            if(!discovered.includes(neighborId)){
+                let neighbor = svg.getElementById(neighborId);
+                neighbor.setAttribute("parent", currentNodeId);
+                steps.push({"elements": [], "actions": [], "classList": [], "indices": [5], "print": `Node ${neighborId} not discovered. Q.push(${neighborId})`, "clearCurrent": false});
+                Q.push(neighborId);
+                discovered.push(neighborId);
+            }else{ // Ignore.
+                steps.push({"elements": [], "actions": [], "classList": [], "indices": [6], "print": `Node ${neighborId} already discovered. Skip it`, "clearCurrent": false});
+            }
+        }
+    }
+}
 
 // Step-based with codetrace:
 function DFS(node){
-    // Initially, all nodes & edges undiscovered.
     // Highlight node as current:
-    steps.push({"elements": [node, node, node], "actions": ["add", "add", "remove"], "classList": ["discoveredNode", "currentNode", "goingTo"], "index": 0, "print": `DFS(${node.id})`, "clearCurrent": true});
+    steps.push({"elements": [node, node, node], "actions": ["add", "add", "remove"], "classList": ["discoveredNode", "currentNode", "goingTo"], "indices": [0], "print": `DFS(${node.id})`, "clearCurrent": true});
 
     discovered.push(node.id);
     // Loop through the edges:
     for(let i in adjacencyList[node.id]){
-        let edge = lines[node.id][i].lineObject;
-
         // Dehighlight node, highlight current edge.
-        steps.push({"elements": [node, edge, edge], "actions": ["remove", "add", "add"], "classList": ["currentNode", "discoveredEdge", "currentEdge"], "index": 1, "print": `Try edge ${node.id} -> ${adjacencyList[node.id][i]}`, "clearCurrent": true});
+        let edge = lines[node.id][i].lineObject;
+        steps.push({"elements": [node, edge, edge], "actions": ["remove", "add", "add"], "classList": ["currentNode", "discoveredEdge", "currentEdge"], "indices": [1], "print": `Try edge ${node.id} -> ${adjacencyList[node.id][i]}`, "clearCurrent": true});
 
         // Go on to neighbor node:
-        let neighbor = document.getElementById(adjacencyList[node.id][i]);
-        if(!discovered.includes(neighbor.id)){
+        let neighborId = adjacencyList[node.id][i];
+        if(!discovered.includes(neighborId)){
+            let neighbor = svg.getElementById(neighborId);
             neighbor.setAttribute("parent", node.id);
-            steps.push({"elements": [edge, neighbor], "actions": ["remove", "add"], "classList": ["currentEdge", "goingTo"], "index": 2, "print": `Node ${neighbor.id} unvisited`, "clearCurrent": false});
+            steps.push({"elements": [edge, neighbor], "actions": ["remove", "add"], "classList": ["currentEdge", "goingTo"], "indices": [2], "print": `Node ${neighborId} unvisited`, "clearCurrent": false});
             DFS(neighbor);
-            steps[steps.length-1] = {"elements": [neighbor, neighbor, node], "actions": ["remove", "add", "add"], "classList": ["currentNode", "finishedNode", "currentNode"], "index": 4, "print": `Done with DFS(${neighbor.id}). Back to DFS(${node.id})`, "clearCurrent": true}; // Override prior entry to make node current.
+            steps[steps.length-1] = {"elements": [neighbor, neighbor, node], "actions": ["remove", "add", "add"], "classList": ["currentNode", "finishedNode", "currentNode"], "indices": [4], "print": `Done with DFS(${neighborId}). Back to DFS(${node.id})`, "clearCurrent": true}; // Override prior entry to make node current.
         }else{
             // Node already discovered, so this edge will not actually be explored.
-            steps.push({"elements": [edge, node], "actions": ["remove", "add"], "classList": ["currentEdge", "currentNode"], "index": 3, "print": `Node ${neighbor.id} already visited. Back to node ${node.id}`, "clearCurrent": true});
+            steps.push({"elements": [edge, node], "actions": ["remove", "add"], "classList": ["currentEdge", "currentNode"], "indices": [3], "print": `Node ${neighborId} already visited. Back to node ${node.id}`, "clearCurrent": true});
         }
     }
    
     // Node finished:
-    steps.push({"elements": [node, node], "actions": ["remove", "add"], "classList": ["currentNode", "finishedNode"], "index": 4, "print": `Done with DFS(${node.id})`, "clearCurrent": true});  // If node is startNode, this will not be overridden. Mark node as finished.
-    return Promise.resolve();
+    steps.push({"elements": [node, node], "actions": ["remove", "add"], "classList": ["currentNode", "finishedNode"], "indices": [4], "print": `Done with DFS(${node.id})`, "clearCurrent": true});  // If node is startNode, this will not be overridden. Mark node as finished.
 }
 
 let current = document.getElementById("current");
 
 function doStep(step){
     if(step > 0){
-        code.getElementsByTagName("p")[steps[step-1]["index"]].removeAttribute("style");
+        for(let index of steps[step-1]["indices"]){
+            codeParagraphs[index].removeAttribute("style");
+        }
     }
     
     if(steps[step]["clearCurrent"]){
@@ -468,7 +504,9 @@ function doStep(step){
     newCurrentText.innerText = steps[step]["print"];
     current.appendChild(newCurrentText);
 
-    code.getElementsByTagName("p")[steps[step]["index"]].setAttribute("style", "background:green;");
+    for(let index of steps[step]["indices"]){
+        codeParagraphs[index].setAttribute("style", "background:green;");
+    }
     for(let j = 0; j < steps[step]["elements"].length; j++){
         if(steps[step]["actions"][j] == "add"){
             steps[step]["elements"][j].classList.add(steps[step]["classList"][j]);
