@@ -19,6 +19,7 @@ let lines = {}; // startID: [lineObject, label]
 let func = BFS;
 let code = document.getElementById(`${func.name}Code`);
 let codeParagraphs = code.getElementsByTagName("p");
+let current = document.getElementById("current");
 let startNode = null;
 
 let steps = []; // {elements: [], actions: [], classList: [], print: String, clearCurrent: Bool}
@@ -169,8 +170,8 @@ function updateAllLines(node){
         let outgoing = lines[node.id][i].lineObject;
         let outgoingLabel = lines[node.id][i].label;
         let x2 = endNode.cx.baseVal.value, y2 = endNode.cy.baseVal.value;
-        // Just outgoing edges.
-        if(!adjacencyList[endNodeId].includes(node.id)){
+        
+        if(!adjacencyList[endNodeId].includes(node.id)){ // Just outgoing edges.
             updateSingleConnection(outgoing, outgoingLabel, x1, y1, x2, y2);
         }else{ // Double connection
             let incoming = lines[endNodeId][adjacencyList[endNodeId].indexOf(node.id)].lineObject;
@@ -255,15 +256,11 @@ function createNewNode(random){
             });
 
             // LABELS MUST BE IN MEMORY AT ALL TIMES IN ORDER TO RESTORE AT CORRECT SPOT AND WEIGHTS WHEN GOING TO A WEIGHTED ALGORITHM.
-            setAttributes(newWeightText, {"x": node.cx.baseVal.value, "y": node.cy.baseVal.value});
+            setAttributes(newWeightText, {"x": node.cx.baseVal.value, "y": node.cy.baseVal.value, "pointer-events": (weighted ? "auto" : "none"), "opacity": weighted ? 1 : 0}); // Instead of removing labels from DOM for unweighted (slow), make them invisible and unclickable.
             let lineWeightGroup = document.createElementNS(svgns, "g");
             lineWeightGroup.appendChild(newLine);
-            // There are two ways to add weight options. The first: remove labels from the HTML entirely. The second: simply make them invisible by setting opacity to 0. The first option also requires looping through all nodes as well to adjust label positions, and proved to be MUCH slower in dense graphs. So, the opacity option is better.
             lineWeightGroup.appendChild(newWeightText);
             svg.appendChild(lineWeightGroup);
-            if(!weighted){
-                setAttributes(newWeightText, {"pointer-events": "none", "opacity": 0});
-            }
         }else if(sourceNode != node && !adjacencyList[sourceNode.id].includes(node.id) && (directed || !adjacencyList[node.id].includes(sourceNode.id))){ // Second node to establish connection. Make sure we don't make an edge to ourselves or a duplicate edge. Also only allow edge in undirected graph if no edge between these two nodes exists.
             newLine.id = `edge${sourceNode.id}_${node.id}`;
             playPause.classList.remove("disableElement", "disableSelect");
@@ -392,18 +389,16 @@ document.addEventListener("keydown", (event) => {
         }else if(event.key == "Backspace" || event.key == "Delete" && cursorIndex > 0){
             selected.textContent = selected.textContent.slice(0, cursorIndex-1) + selected.textContent.slice(cursorIndex);
             editLabel(selected);
-        }else if(isFinite(event.key) && selected.textContent.length < 6){ // 0 - 9
+        }else if(isFinite(event.key) && event.key != " " && selected.textContent.length < 6){ // 0 - 9
             selected.textContent = selected.textContent.slice(0, cursorIndex) + event.key + selected.textContent.slice(cursorIndex);
             editLabel(selected);
         }
-    }else if(event.key == "ArrowRight"){
-        // Step forward. Pause execution.
-        playPause.classList.add("play");
-    }else if(event.key == "ArrowLeft"){
-        // Step back. Pause execution.
-        playPause.classList.add("play");
+    }else if(event.key == "ArrowRight"){ // Step forward. Pause execution.
+    }else if(event.key == "ArrowLeft"){ // Step back. Pause execution.
     }else if(event.key == " "){
-        // Toggle play/pause.
+        if(!playPause.classList.contains("disableElement")){
+            playPause.click(); // execute() has event listener on click, so spacebar will simulate a click to trigger that event listener (vs. calling a function that won't trigger event listener).
+        }
     }
 });
 
@@ -422,22 +417,18 @@ function waitListener(Element, ListenerName) {
 }
 
 function BFS(node){
-    // I like the visualization, but some considerations/notes:
-        // Consider a: highlighting current node and current edge, and/or b: highlight neighbor node and current edge. Might make it clearer.
-        // Consider using the goingTo class instead of discovered to differentiate between frontier nodes and currentNode when off exploring and edge and removing the currentNode class (when we highlight index 4)
-        // Conisder only highlighting index 1, not both 0 and 1 initially for cleanliness. 
     let Q = [node.id];
     discovered = [node.id];
-    steps.push({"elements": [node, node], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"], "indices": [0, 1], "print": `BFS(${node.id}):\nInitialize Q = {${Q}}`, "clearCurrent": true}); // Done.
+    steps.push({"elements": [node, node], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"], "indices": [0, 1], "print": `BFS(${node.id}):\nInitialize Q = {${Q}}`, "clearCurrent": true});
     let priorNode = null;
     let currentNode = null;
     while(Q.length > 0){
         let currentNodeId = Q.shift();
         currentNode = svg.getElementById(currentNodeId);
         if(priorNode == null){
-            steps.push({"elements": [currentNode, currentNode], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true}); // Done.
+            steps.push({"elements": [currentNode, currentNode], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
         }else{
-            steps.push({"elements": [currentNode, currentNode, priorNode, priorNode], "actions": ["add", "add", "remove", "add"], "classList": ["discoveredNode", "currentNode", "currentNode", "finishedNode"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true}); // Done.
+            steps.push({"elements": [currentNode, currentNode, priorNode, priorNode], "actions": ["add", "add", "remove", "add"], "classList": ["discoveredNode", "currentNode", "currentNode", "finishedNode"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
         }
 
         for(let neighborId of adjacencyList[currentNodeId]){
@@ -449,7 +440,7 @@ function BFS(node){
                 steps.push({"elements": [neighbor, currentNode, edge], "actions": ["add", "add", "remove"], "classList": ["discoveredNode", "currentNode", "currentEdge"], "indices": [5], "print": `Node ${neighborId} not discovered. Q.push(${neighborId})`, "clearCurrent": false});
                 Q.push(neighborId);
                 discovered.push(neighborId);
-            }else{ // Ignore.
+            }else{ // Ignore this node.
                 steps.push({"elements": [currentNode, edge], "actions": ["add", "remove"], "classList": ["currentNode", "currentEdge"], "indices": [6], "print": `Node ${neighborId} already discovered. Skip it`, "clearCurrent": false});
             }
         }
@@ -458,7 +449,6 @@ function BFS(node){
     steps.push({"elements": [currentNode, currentNode], "actions": ["remove", "add"], "classList": ["currentNode", "finishedNode"], "indices": [], "print": `BFS(${node.id}) Done`, "clearCurrent": true});
 }
 
-// Step-based with codetrace:
 function DFS(node){
     // Highlight node as current:
     steps.push({"elements": [node, node, node], "actions": ["add", "add", "remove"], "classList": ["discoveredNode", "currentNode", "goingTo"], "indices": [0], "print": `DFS(${node.id})`, "clearCurrent": true});
@@ -487,8 +477,6 @@ function DFS(node){
     // Node finished:
     steps.push({"elements": [node, node], "actions": ["remove", "add"], "classList": ["currentNode", "finishedNode"], "indices": [4], "print": `Done with DFS(${node.id})`, "clearCurrent": true});  // If node is startNode, this will not be overridden. Mark node as finished.
 }
-
-let current = document.getElementById("current");
 
 function doStep(step){
     if(step > 0){

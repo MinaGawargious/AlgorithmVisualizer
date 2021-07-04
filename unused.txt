@@ -865,4 +865,8 @@ OLD COMMENTS:
 
 Before DFS:
 // Unweighted. Directed or undirected. Focus on directed only for now, and we can add the option for an algorithm to be either directed or undirected later.
+
+In nodeTextGroup.addEventListener("click")
+// There are two ways to add weight options. The first: remove labels from the HTML entirely. The second: simply make them invisible by setting opacity to 0. The first option also requires looping through all nodes as well to adjust label positions, and proved to be MUCH slower in dense graphs. So, the opacity option is better.
+
 ****************************************/
