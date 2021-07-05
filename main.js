@@ -145,7 +145,7 @@ function updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel
 function updateSingleConnection(line, label, x1, y1, x2, y2){
     if(x1 != x2 || y1 != y2){ // Avoid 0/0.
         let [lineX2, lineY2, lineArrowheadColor, lineArrowhead] = getLineProperties(x1, y1, x2, y2);
-        setAttributes(line, {"x1": x1, "y1": y1, "x2": directed ? lineX2: x2, "y2": directed ? lineY2: y2, "stroke": directed ? lineArrowheadColor : "black"});
+        setAttributes(line, {"x1": x1, "y1": y1, "x2": directed ? lineX2 : x2, "y2": directed ? lineY2 : y2, "stroke": directed ? lineArrowheadColor : "black"});
         directed ? setAttributes(line, {"marker-end": `url(#${lineArrowhead})`}) : line.removeAttribute("marker-end");
         updateLabelPosition(x1, y1, x2, y2, label);
     }
@@ -156,27 +156,24 @@ function updateAllLines(node){
     // Incoming (override double connection below):
     for(let i = 0; i < Object.keys(adjacencyList).length; i++){
         if(adjacencyList[i].includes(node.id)){
-            let incoming = lines[i][adjacencyList[i].indexOf(node.id)].lineObject;
-            let label = lines[i][adjacencyList[i].indexOf(node.id)].label;
+            let incoming = lines[i][adjacencyList[i].indexOf(node.id)];
             let endNode = svg.getElementById(i);
             let x2 = endNode.cx.baseVal.value, y2 = endNode.cy.baseVal.value;
-            updateSingleConnection(incoming, label, x2, y2, x1, y1);
+            updateSingleConnection(incoming.lineObject, incoming.label, x2, y2, x1, y1);
         }
     }
 
     for(let i = 0; i < adjacencyList[node.id].length; i++){
         let endNodeId = adjacencyList[node.id][i];
         let endNode = svg.getElementById(endNodeId);
-        let outgoing = lines[node.id][i].lineObject;
-        let outgoingLabel = lines[node.id][i].label;
+        let outgoing = lines[node.id][i];
         let x2 = endNode.cx.baseVal.value, y2 = endNode.cy.baseVal.value;
         
         if(!adjacencyList[endNodeId].includes(node.id)){ // Just outgoing edges.
-            updateSingleConnection(outgoing, outgoingLabel, x1, y1, x2, y2);
+            updateSingleConnection(outgoing.lineObject, outgoing.label, x1, y1, x2, y2);
         }else{ // Double connection
-            let incoming = lines[endNodeId][adjacencyList[endNodeId].indexOf(node.id)].lineObject;
-            let incomingLabel = lines[endNodeId][adjacencyList[endNodeId].indexOf(node.id)].label;
-            updateDoubleConnection(incoming, outgoing, incomingLabel, outgoingLabel, x2, y2, x1, y1, endNodeId, node.id);
+            let incoming = lines[endNodeId][adjacencyList[endNodeId].indexOf(node.id)];
+            updateDoubleConnection(incoming.lineObject, outgoing.lineObject, incoming.label, outgoing.label, x2, y2, x1, y1, endNodeId, node.id);
         }
     }
 }
@@ -270,9 +267,8 @@ function createNewNode(random){
 
             if(adjacencyList[node.id].includes(sourceNode.id) && directed){ // Outgoing edge already exists. Incoming being created.
                 let index = adjacencyList[node.id].indexOf(`${sourceNode.id}`);
-                let outgoing = lines[node.id][index].lineObject; // newLine is incoming.
-                let outgoingLabel = lines[node.id][index].label;
-                updateDoubleConnection(newLine, outgoing, newWeightText, outgoingLabel, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, node.cx.baseVal.value, node.cy.baseVal.value, sourceNode.id, node.id);
+                let outgoing = lines[node.id][index]; // newLine is incoming.
+                updateDoubleConnection(newLine, outgoing.lineObject, newWeightText, outgoing.label, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, node.cx.baseVal.value, node.cy.baseVal.value, sourceNode.id, node.id);
             }else{
                 updateSingleConnection(newLine, newWeightText, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, node.cx.baseVal.value, node.cy.baseVal.value);
             }
@@ -496,11 +492,10 @@ function doStep(step){
         codeParagraphs[index].setAttribute("style", "background:green;");
     }
     for(let j = 0; j < steps[step]["elements"].length; j++){
-        if(steps[step]["actions"][j] == "add"){
-            steps[step]["elements"][j].classList.add(steps[step]["classList"][j]);
-        }else{
-            steps[step]["elements"][j].classList.remove(steps[step]["classList"][j]);
-        }
+        let action = steps[step]["actions"][j];
+        let element = steps[step]["elements"][j];
+        let currentClass = steps[step]["classList"][j];
+        action == "add" ? element.classList.add(currentClass) : element.classList.remove(currentClass);
     }
 }
 
