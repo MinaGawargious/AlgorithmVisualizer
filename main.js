@@ -12,7 +12,7 @@ let sourceNode = newLine = newWeightText = draggedItem = null;
 let selectedRect = document.createElementNS(svgns, "rect");
 setAttributes(selectedRect, {"fill": "none", "stroke": "blue"});
 let selected = null;
-let weighted = false, directed = true;
+let weighted = true, directed = true;
 
 let adjacencyList = {}; // startID: [endIds]
 let lines = {}; // startID: [lineObject, label]
@@ -86,7 +86,7 @@ start = form.getElementsByTagName("input")[0];
 form.onpaste = event => event.preventDefault();
 form.onsubmit = (event) => {
     event.preventDefault();
-    if(start.value < numNodes){
+    if(start.value < numNodes && start.value != startNode.id){
         startNode.classList.remove("startNode");
         let newStart = svg.getElementById(parseInt(start.value));
         newStart.classList.add("startNode");
@@ -227,23 +227,19 @@ function createNewNode(random){
     newText.textContent = numNodes;
     adjacencyList[numNodes] = [];
     lines[numNodes++] = [];
-    nodeTextGroup.appendChild(node);
-    nodeTextGroup.appendChild(newText);
+    nodeTextGroup.append(node, newText);
     svg.appendChild(nodeTextGroup);
 
     nodeTextGroup.addEventListener("click", (event) => {
         if(sourceNode == null){
             sourceNode = node;
             newLine = document.createElementNS(svgns, "line");
-            setAttributes(newLine, {"x1": node.cx.baseVal.value, "y1": node.cy.baseVal.value, "x2": node.cx.baseVal.value, "y2": node.cy.baseVal.value, "style": "stroke-width:4", "pointer-events": "none", "stroke": "black"});
-            if(directed){
-                setAttributes(newLine, {"marker-end": "url(#arrowheadBlack_Near)"});
-            }
+            setAttributes(newLine, {"x1": node.cx.baseVal.value, "y1": node.cy.baseVal.value, "x2": node.cx.baseVal.value, "y2": node.cy.baseVal.value, "style": "stroke-width:4", "pointer-events": "none", "stroke": "black", "marker-end": directed ? "url(#arrowheadBlack_Near)" : "none"});
 
             newWeightText = document.createElementNS(svgns, "text");
             newWeightText.textContent = "1";
             newWeightText.addEventListener("click", (event) => {
-                selected = event.target; // We can reference newWeightText when setting fields upon creation because it's not null then. Upon click, however, it is null, so to reference this unique text field again, use event.target.
+                selected = event.target; // We can reference newWeightText when setting fields upon creation because it's not null then. But upon click, it is null, so to reference this unique text field again, use event.target.
                 console.log(selected);
                 selected.textContent += "|";
               
@@ -255,8 +251,7 @@ function createNewNode(random){
             // LABELS MUST BE IN MEMORY AT ALL TIMES IN ORDER TO RESTORE AT CORRECT SPOT AND WEIGHTS WHEN GOING TO A WEIGHTED ALGORITHM.
             setAttributes(newWeightText, {"x": node.cx.baseVal.value, "y": node.cy.baseVal.value, "pointer-events": (weighted ? "auto" : "none"), "opacity": weighted ? 1 : 0}); // Instead of removing labels from DOM for unweighted (slow), make them invisible and unclickable.
             let lineWeightGroup = document.createElementNS(svgns, "g");
-            lineWeightGroup.appendChild(newLine);
-            lineWeightGroup.appendChild(newWeightText);
+            lineWeightGroup.append(newLine, newWeightText);
             svg.appendChild(lineWeightGroup);
         }else if(sourceNode != node && !adjacencyList[sourceNode.id].includes(node.id) && (directed || !adjacencyList[node.id].includes(sourceNode.id))){ // Second node to establish connection. Make sure we don't make an edge to ourselves or a duplicate edge. Also only allow edge in undirected graph if no edge between these two nodes exists.
             newLine.id = `edge${sourceNode.id}_${node.id}`;
@@ -326,8 +321,8 @@ function doneEditing(){
         svg.removeChild(selectedRect);
     }
     if(selected != null){
-        selected.textContent = selected.textContent.replace('|', '');
-        if(selected.textContent.length == 0){
+        selected.textContent = parseInt(selected.textContent.replace('|', '')); // parseInt eliminates trailing 0s. Returns NaN for not-a-number, such as empty strings.
+        if(isNaN(selected.textContent)){
             selected.textContent = "1";
         }
         editLabel(selected);
