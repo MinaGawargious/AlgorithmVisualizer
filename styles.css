@@ -104,7 +104,6 @@ header ul li ul li a{
 }
   
 .content{
-    /* background: orange; */
     margin: auto;
     padding: auto;
     width: 100%;
@@ -221,7 +220,6 @@ label{
     padding: 0px 10px 3px 5px;
     margin: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    /* background: red; */
 }
 #codetrace #current{
     background: var(--codetrace-current-color);

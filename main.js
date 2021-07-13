@@ -28,10 +28,12 @@ let discovered = [];
 let algorithms = document.querySelectorAll(".algorithm");
 for(let algorithm of algorithms){
     algorithm.addEventListener("click", () => {
+        code.classList.add("invisible");
         steps = [];
         discovered = [];
         func = window[algorithm.classList[0]];
         code = document.getElementById(func.name+"Code");
+        code.classList.remove("invisible");
         codeParagraphs = code.getElementsByTagName("p");
         setWeighted(algorithm.getAttribute("weighted") == "true");
         setDirected(algorithm.getAttribute("directed") == "true");
