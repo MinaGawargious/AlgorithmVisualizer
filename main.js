@@ -12,7 +12,7 @@ let sourceNode = newLine = newWeightText = draggedItem = null;
 let selectedRect = document.createElementNS(svgns, "rect");
 setAttributes(selectedRect, {"fill": "none", "stroke": "blue"});
 let selected = null;
-let weighted = true, directed = true;
+let weighted = false, directed = true;
 
 let adjacencyList = {}; // startID: [endIds]
 let lines = {}; // startID: [lineObject, label]
@@ -421,20 +421,20 @@ function BFS(node){
         if(priorNode == null){
             steps.push({"elements": [currentNode, currentNode], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
         }else{
-            steps.push({"elements": [currentNode, currentNode, priorNode, priorNode], "actions": ["add", "add", "remove", "add"], "classList": ["discoveredNode", "currentNode", "currentNode", "finishedNode"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
+            steps.push({"elements": [currentNode, currentNode, priorNode, priorNode, priorNode], "actions": ["add", "add", "remove", "add", "remove"], "classList": ["discoveredNode", "currentNode", "currentNode", "finishedNode", "comingFrom"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
         }
 
         for(let neighborId of adjacencyList[currentNodeId]){
             let edge = svg.getElementById(`edge${currentNodeId}_${neighborId}`);
-            steps.push({"elements": [edge, edge, currentNode], "actions": ["add", "add", "remove"], "classList": ["discoveredEdge", "currentEdge", "currentNode"], "indices": [4], "print": `Try edge ${currentNodeId} -> ${neighborId}`, "clearCurrent": true});
+            steps.push({"elements": [edge, edge, currentNode, currentNode], "actions": ["add", "add", "remove", "add"], "classList": ["discoveredEdge", "currentEdge", "currentNode", "comingFrom"], "indices": [4], "print": `Try edge ${currentNodeId} -> ${neighborId}`, "clearCurrent": true}); // Removing currentNode and adding comingFrom is redunant after first iteration.
             if(!discovered.includes(neighborId)){
                 let neighbor = svg.getElementById(neighborId);
                 neighbor.setAttribute("parent", currentNodeId);
-                steps.push({"elements": [neighbor, currentNode, edge], "actions": ["add", "add", "remove"], "classList": ["discoveredNode", "currentNode", "currentEdge"], "indices": [5], "print": `Node ${neighborId} not discovered. Q.push(${neighborId})`, "clearCurrent": false});
+                steps.push({"elements": [neighbor, edge], "actions": ["add", "remove"], "classList": ["discoveredNode", "currentEdge"], "indices": [5], "print": `Node ${neighborId} not discovered. Q.push(${neighborId})`, "clearCurrent": false});
                 Q.push(neighborId);
                 discovered.push(neighborId);
             }else{ // Ignore this node.
-                steps.push({"elements": [currentNode, edge], "actions": ["add", "remove"], "classList": ["currentNode", "currentEdge"], "indices": [6], "print": `Node ${neighborId} already discovered. Skip it`, "clearCurrent": false});
+                steps.push({"elements": [edge], "actions": ["remove"], "classList": ["currentEdge"], "indices": [6], "print": `Node ${neighborId} already discovered. Skip it`, "clearCurrent": false});
             }
         }
         priorNode = currentNode;
