@@ -510,6 +510,44 @@ stepSlider.oninput = (event) => {
     }
 }
 
-function Dijkstra(){}
+function Dijkstra(node){
+    // Dijkstra's is basically weighted BFS.
+    // Initialize all distances to infinity, except distance from source to source, which is 0. Also initialize all parents as null and Q = all nodes:
+    let distances = [];
+    let parents = [];
+    let remainingNodeIDs = []; // Q
+
+    for(let i = 0; i < numNodes; i++){
+        distances.push(Infinity);
+        parents.push(null);
+        remainingNodeIDs.push(i); 
+    }
+    distances[node.id] = 0;
+
+    while(remainingNodeIDs.length > 0){
+        // Extract remaining node with minimum distance:
+        let minIndex = -1, minDistance = Infinity;
+        for(let i = 0; i < remainingNodeIDs.length; i++){
+            if(distances[remainingNodeIDs[i]] < minDistance){
+                minDistance = distances[remainingNodeIDs[i]];
+                minIndex = i;
+            }
+        }
+        let currentNodeId = remainingNodeIDs[minIndex];
+        remainingNodeIDs.splice(minIndex, 1);
+        
+        let currentNode = svg.getElementById(currentNodeId);
+        // Relax each edge:
+        for(let neighborId of adjacencyList[currentNodeId]){
+            let edge = svg.getElementById(`edge${currentNodeId}_${neighborId}`);
+            let weight = parseInt(edge.nextElementSibling.textContent);
+            if(distances[neighborId] > distances[currentNodeId] + weight){
+                // This new path is shorter.
+                distances[neighborId] = distances[currentNodeId] + weight;
+                parents[neighborId] = currentNodeId;
+            }
+        }
+    }
+}
 
 function Bellman_Ford(){}
