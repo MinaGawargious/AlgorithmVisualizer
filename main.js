@@ -35,18 +35,16 @@ for(let algorithm of algorithms){
         code = document.getElementById(func.name+"Code");
         code.classList.remove("invisible");
         codeParagraphs = code.getElementsByTagName("p");
-        setWeighted(algorithm.getAttribute("weighted") == "true");
-        setDirected(algorithm.getAttribute("directed") == "true");
+        setWeightedAndDirected(algorithm.getAttribute("weighted") == "true", algorithm.getAttribute("directed") == "true");
         console.log(algorithm);
     });
 }
 
-let h = 6;
-let w = 4;
+let h = 6, w = 4;
 let defs = document.createElementNS(svgns, "defs");
 
-for (color of ["Black", "Blue"]){
-    for (distance of ["Near", "Far"]){
+for (let color of ["Black"]){
+    for (let distance of ["Near", "Far"]){
         let arrowheadMarker = document.createElementNS(svgns, "marker");
         setAttributes(arrowheadMarker, {"id": `arrowhead${color}_${distance}`, "markerWidth": h, "markerHeight": w, "refX": distance == "Far" ? 0 : h, "refY": w/2, "orient": "auto", "fill": color});
         let arrowhead = document.createElementNS(svgns, "polygon");
@@ -90,9 +88,8 @@ form.onsubmit = (event) => {
     event.preventDefault();
     if(start.value < numNodes && start.value != startNode.id){
         startNode.classList.remove("startNode");
-        let newStart = svg.getElementById(parseInt(start.value));
-        newStart.classList.add("startNode");
-        startNode = newStart;
+        startNode = svg.getElementById(parseInt(start.value));
+        startNode.classList.add("startNode");
     }
 }
 
@@ -180,7 +177,7 @@ function updateAllLines(node){
     }
 }
 
-function setWeighted(newWeight){
+function setWeightedAndDirected(newWeight, newDirected){
     if(weighted != newWeight){
         weighted = newWeight;
         for(let i in lines){
@@ -193,9 +190,7 @@ function setWeighted(newWeight){
         }
         console.log("CHANGING TO " + (weighted ? "" : "un") + "weighted");
     }
-}
 
-function setDirected(newDirected){
     if(directed != newDirected){
         directed = newDirected;
         for(let node of svg.getElementsByTagNameNS(svgns, "circle")){
@@ -205,19 +200,12 @@ function setDirected(newDirected){
     }
 }
 
-let currentPosition = 30;
-
-function createNewNode(random){
+function createNewNode(){
     let radius = window.innerWidth/30;
     let nodeTextGroup = document.createElementNS(svgns, "g");
     let node = document.createElementNS(svgns, "circle");
-    if(random){
-        setAttributes(node, {"r": radius, "cx": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("height").slice(0, -2), "style": "stroke-width:4", "id": numNodes});
-    }else{
-        setAttributes(node, {"r": radius, "cx": currentPosition%window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": 30 + 30*Math.floor(currentPosition/window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2)), "style": "stroke-width:4", "id": numNodes});
-        currentPosition+=75;
-    }
 
+    setAttributes(node, {"r": radius, "cx": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("width").slice(0, -2), "cy": Math.random() * window.getComputedStyle(svg,null).getPropertyValue("height").slice(0, -2), "style": "stroke-width:4", "id": numNodes});
     node.classList.add("node");
     if(numNodes == 0){
         node.classList.add("startNode");
@@ -287,7 +275,7 @@ function createNewNode(random){
 
 let addButton = document.getElementsByClassName("add")[0];
 addButton.addEventListener("click", (event) => {
-    createNewNode(true);
+    createNewNode();
 });
 
 // I may consider changing this for speed: have an array of length numNodes, with each node's parent id, DOM element, and edge element from parent to itself. 
@@ -360,11 +348,7 @@ function editLabel(label){
 }
 
 document.addEventListener("keydown", (event) => {
-    if(event.key == "t"){ // Quickly create 100 test nodes.
-        for(let i = 0; i < 100; i++){
-            createNewNode(false);
-        }
-    }else if(event.key == "Escape" || event.key == "Enter"){
+    if(event.key == "Escape" || event.key == "Enter"){
         if(newWeightText != null){
             svg.removeChild(newWeightText.parentElement);
         }
