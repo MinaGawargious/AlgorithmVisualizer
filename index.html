@@ -33,7 +33,7 @@
         <div id="codetrace" class="disableSelect">
             <div id="current"></div>
             <div id="code">
-                <div id="BFSCode">
+                <div id="BFSCode" class="invisible">
                     <p>BFS(u):</p>
                     <p>&emsp;Q = {u}</p>
                     <p>&emsp;while Q is not empty:</p>
@@ -49,8 +49,16 @@
                     <p>&emsp;&emsp;else, back to node u</p>
                     <p>&emsp;return</p>
                 </div>
-                <div id="DijkstraCode" class="invisible">
-                    
+                <div id="DijkstraCode">
+                    <p>Dijkstra(u):</p>
+                    <p>&emsp;Initialize distances, parents, & priority queue Q</p>
+                    <p>&emsp;while Q is not empty:</p>
+                    <p>&emsp;&emsp;v = Q.extractMin()</p>
+                    <p>&emsp;&emsp;for each edge e = (v,w):</p>
+                    <p>&emsp;&emsp;&emsp;if w.distance > v.distance + e.weight:</p>
+                    <p>&emsp;&emsp;&emsp;&emsp;w.distance = v.distance + e.weight</p>
+                    <p>&emsp;&emsp;&emsp;&emsp;w.parent = v</p>
+                    <p>&emsp;&emsp;&emsp;else, ignore this edge</p>
                 </div>
                 <div id="Bellman_FordCode" class="invisible"></div>
             </div>

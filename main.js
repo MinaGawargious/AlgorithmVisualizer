@@ -16,7 +16,7 @@ let weighted = false, directed = true;
 
 let adjacencyList = {}; // startID: [endIds]
 let lines = {}; // startID: [lineObject, label]
-let func = BFS;
+let func = Dijkstra;
 let code = document.getElementById(`${func.name}Code`);
 let codeParagraphs = code.getElementsByTagName("p");
 let current = document.getElementById("current");
@@ -393,6 +393,61 @@ function waitListener(Element, ListenerName) {
     });
 }
 
+function doStep(step){
+    if(step > 0){
+        for(let index of steps[step-1]["indices"]){
+            codeParagraphs[index].removeAttribute("style");
+        }
+    }
+    
+    if(steps[step]["clearCurrent"]){
+        current.innerHTML = "";
+    }
+    let newCurrentText = document.createElement("p");
+    newCurrentText.innerText = steps[step]["print"];
+    current.appendChild(newCurrentText);
+
+    for(let index of steps[step]["indices"]){
+        codeParagraphs[index].setAttribute("style", "background:green;");
+    }
+    for(let j = 0; j < steps[step]["elements"].length; j++){
+        let action = steps[step]["actions"][j];
+        let element = steps[step]["elements"][j];
+        let currentClass = steps[step]["classList"][j];
+        action == "add" ? element.classList.add(currentClass) : element.classList.remove(currentClass);
+    }
+}
+
+let oldValue = 0;
+let baseWait = 2500;
+let speedSlider = document.getElementById("speedSlider");
+
+async function execute(){ // async is syntactic sugar to return the values as a resolved promise.
+    while(stepSlider.value < steps.length){
+        // Execute step at index stepSlider.value.
+        doStep(stepSlider.value);
+        stepSlider.value++;
+        // console.log("Going from ", oldValue, "to ", stepSlider.value);
+        oldValue = parseInt(stepSlider.value);
+        await sleep(baseWait/speedSlider.value); // await pauses execution until the promise is resolved.
+        if(playPause.classList.contains("play")){
+            await waitListener(playPause,"click");
+        }
+        console.log("waitListener done. stepSlider.value = ", stepSlider.value);
+    }
+    playPause.classList.add("play");
+}
+
+stepSlider.oninput = (event) => {
+    console.log(oldValue, stepSlider.value);
+    let max = parseInt(stepSlider.value);
+    while(oldValue < max){
+        console.log("oldValue = ", oldValue, " and stepSlider.value = ", stepSlider.value);
+        doStep(oldValue);
+        oldValue++;
+    }
+}
+
 function BFS(node){
     let Q = [node.id];
     discovered = [node.id];
@@ -455,61 +510,6 @@ function DFS(node){
     steps.push({"elements": [node, node], "actions": ["remove", "add"], "classList": ["currentNode", "finishedNode"], "indices": [4], "print": `Done with DFS(${node.id})`, "clearCurrent": true});  // If node is startNode, this will not be overridden. Mark node as finished.
 }
 
-function doStep(step){
-    if(step > 0){
-        for(let index of steps[step-1]["indices"]){
-            codeParagraphs[index].removeAttribute("style");
-        }
-    }
-    
-    if(steps[step]["clearCurrent"]){
-        current.innerHTML = "";
-    }
-    let newCurrentText = document.createElement("p");
-    newCurrentText.innerText = steps[step]["print"];
-    current.appendChild(newCurrentText);
-
-    for(let index of steps[step]["indices"]){
-        codeParagraphs[index].setAttribute("style", "background:green;");
-    }
-    for(let j = 0; j < steps[step]["elements"].length; j++){
-        let action = steps[step]["actions"][j];
-        let element = steps[step]["elements"][j];
-        let currentClass = steps[step]["classList"][j];
-        action == "add" ? element.classList.add(currentClass) : element.classList.remove(currentClass);
-    }
-}
-
-let oldValue = 0;
-let baseWait = 2500;
-let speedSlider = document.getElementById("speedSlider");
-
-async function execute(){ // async is syntactic sugar to return the values as a resolved promise.
-    while(stepSlider.value < steps.length){
-        // Execute step at index stepSlider.value.
-        doStep(stepSlider.value);
-        stepSlider.value++;
-        // console.log("Going from ", oldValue, "to ", stepSlider.value);
-        oldValue = parseInt(stepSlider.value);
-        await sleep(baseWait/speedSlider.value); // await pauses execution until the promise is resolved.
-        if(playPause.classList.contains("play")){
-            await waitListener(playPause,"click");
-        }
-        console.log("waitListener done. stepSlider.value = ", stepSlider.value);
-    }
-    playPause.classList.add("play");
-}
-
-stepSlider.oninput = (event) => {
-    console.log(oldValue, stepSlider.value);
-    let max = parseInt(stepSlider.value);
-    while(oldValue < max){
-        console.log("oldValue = ", oldValue, " and stepSlider.value = ", stepSlider.value);
-        doStep(oldValue);
-        oldValue++;
-    }
-}
-
 function Dijkstra(node){
     // Dijkstra's is basically weighted BFS.
     // Initialize all distances to infinity, except distance from source to source, which is 0. Also initialize all parents as null and Q = all nodes:
@@ -545,9 +545,13 @@ function Dijkstra(node){
                 // This new path is shorter.
                 distances[neighborId] = distances[currentNodeId] + weight;
                 parents[neighborId] = currentNodeId;
+            }else{
+                // Ignore this edge.
             }
         }
     }
 }
 
 function Bellman_Ford(){}
+
+// TODO: Add "parent" and "distances" to step actions, and show distances at each step. Also grey out unused edges.
