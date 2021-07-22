@@ -238,6 +238,15 @@ label{
     fill: var(--nodeTextColor);
 }
   
+@keyframes blink{
+    50% {
+        opacity: 0;
+    }
+    /* 100%{ */
+        /* opacity: 1; */
+    /* } */
+}
+
 .startNode{
     fill: var(--startFillColor);
     stroke: var(--startBorderColor);
@@ -257,15 +266,6 @@ label{
 .finishedNode{
     fill: var(--finishedNodeFillColor);
     stroke: var(--finishedNodeBorderColor);
-}
-
-@keyframes blink{
-    50% {
-        opacity: 0;
-    }
-    /* 100%{ */
-        /* opacity: 1; */
-    /* } */
 }
 .goingTo{
     animation: blink 0.35s linear infinite;
