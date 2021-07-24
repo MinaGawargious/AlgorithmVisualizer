@@ -22,7 +22,7 @@ let codeParagraphs = code.getElementsByTagName("p");
 let current = document.getElementById("current");
 let startNode = null;
 
-let steps = []; // {elements: [], actions: [], classList: [], print: String, clearCurrent: Bool}
+let steps = []; // {elements: [], actions: [], attributeList: [], print: String, clearCurrent: Bool}
 let discovered = [];
 
 let algorithms = document.querySelectorAll(".algorithm");
@@ -413,8 +413,14 @@ function doStep(step){
     for(let j = 0; j < steps[step]["elements"].length; j++){
         let action = steps[step]["actions"][j];
         let element = steps[step]["elements"][j];
-        let currentClass = steps[step]["classList"][j];
-        action == "add" ? element.classList.add(currentClass) : element.classList.remove(currentClass);
+        let currentAttribute = steps[step]["attributeList"][j];
+        if(action == "add"){
+            element.classList.add(currentAttribute);
+        }else if(action == "remove"){
+            element.classList.remove(currentAttribute);
+        }else if(action == "setParent"){
+            element.setAttribute("parent", currentAttribute);
+        }
     }
 }
 
@@ -451,39 +457,38 @@ stepSlider.oninput = (event) => {
 function BFS(node){
     let Q = [node.id];
     discovered = [node.id];
-    steps.push({"elements": [node, node], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"], "indices": [0, 1], "print": `BFS(${node.id}):\nInitialize Q = {${Q}}`, "clearCurrent": true});
+    steps.push({"elements": [node, node], "actions": ["add", "add"], "attributeList": ["discoveredNode", "currentNode"], "indices": [0, 1], "print": `BFS(${node.id}):\nInitialize Q = {${Q}}`, "clearCurrent": true});
     let priorNode = null;
     let currentNode = null;
     while(Q.length > 0){
         let currentNodeId = Q.shift();
         currentNode = svg.getElementById(currentNodeId);
         if(priorNode == null){
-            steps.push({"elements": [currentNode, currentNode], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
+            steps.push({"elements": [currentNode, currentNode], "actions": ["add", "add"], "attributeList": ["discoveredNode", "currentNode"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
         }else{
-            steps.push({"elements": [currentNode, currentNode, priorNode, priorNode, priorNode], "actions": ["add", "add", "remove", "add", "remove"], "classList": ["discoveredNode", "currentNode", "currentNode", "finishedNode", "comingFrom"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
+            steps.push({"elements": [currentNode, currentNode, priorNode, priorNode, priorNode], "actions": ["add", "add", "remove", "add", "remove"], "attributeList": ["discoveredNode", "currentNode", "currentNode", "finishedNode", "comingFrom"], "indices": [2, 3], "print": `Q = {${[currentNodeId].concat(Q)}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
         }
 
         for(let neighborId of adjacencyList[currentNodeId]){
             let edge = svg.getElementById(`edge${currentNodeId}_${neighborId}`);
-            steps.push({"elements": [edge, edge, currentNode, currentNode], "actions": ["add", "add", "remove", "add"], "classList": ["discoveredEdge", "currentEdge", "currentNode", "comingFrom"], "indices": [4], "print": `Try edge ${currentNodeId} -> ${neighborId}`, "clearCurrent": true}); // Removing currentNode and adding comingFrom is redunant after first iteration.
+            steps.push({"elements": [edge, edge, currentNode, currentNode], "actions": ["add", "add", "remove", "add"], "attributeList": ["discoveredEdge", "currentEdge", "currentNode", "comingFrom"], "indices": [4], "print": `Try edge ${currentNodeId} -> ${neighborId}`, "clearCurrent": true}); // Removing currentNode and adding comingFrom is redunant after first iteration.
             if(!discovered.includes(neighborId)){
                 let neighbor = svg.getElementById(neighborId);
-                neighbor.setAttribute("parent", currentNodeId);
-                steps.push({"elements": [neighbor, edge], "actions": ["add", "remove"], "classList": ["discoveredNode", "currentEdge"], "indices": [5], "print": `Node ${neighborId} not discovered. Q.push(${neighborId})`, "clearCurrent": false});
+                steps.push({"elements": [neighbor, edge, neighbor], "actions": ["add", "remove", "setParent"], "attributeList": ["discoveredNode", "currentEdge", currentNodeId], "indices": [5], "print": `Node ${neighborId} not discovered. Q.push(${neighborId})`, "clearCurrent": false});
                 Q.push(neighborId);
                 discovered.push(neighborId);
             }else{ // Ignore this node.
-                steps.push({"elements": [edge], "actions": ["remove"], "classList": ["currentEdge"], "indices": [6], "print": `Node ${neighborId} already discovered. Skip it`, "clearCurrent": false});
+                steps.push({"elements": [edge], "actions": ["remove"], "attributeList": ["currentEdge"], "indices": [6], "print": `Node ${neighborId} already discovered. Skip it`, "clearCurrent": false});
             }
         }
         priorNode = currentNode;
     }
-    steps.push({"elements": [currentNode, currentNode, currentNode], "actions": ["remove", "remove", "add"], "classList": ["currentNode", "comingFrom", "finishedNode"], "indices": [], "print": `BFS(${node.id}) Done`, "clearCurrent": true});
+    steps.push({"elements": [currentNode, currentNode, currentNode], "actions": ["remove", "remove", "add"], "attributeList": ["currentNode", "comingFrom", "finishedNode"], "indices": [], "print": `BFS(${node.id}) Done`, "clearCurrent": true});
 }
 
 function DFS(node){
     // Highlight node as current:
-    steps.push({"elements": [node, node, node], "actions": ["add", "add", "remove"], "classList": ["discoveredNode", "currentNode", "goingTo"], "indices": [0], "print": `DFS(${node.id})`, "clearCurrent": true});
+    steps.push({"elements": [node, node, node], "actions": ["add", "add", "remove"], "attributeList": ["discoveredNode", "currentNode", "goingTo"], "indices": [0], "print": `DFS(${node.id})`, "clearCurrent": true});
 
     discovered.push(node.id);
     // Loop through the edges:
@@ -491,23 +496,22 @@ function DFS(node){
         // Dehighlight node, highlight current edge.
         let edge = lines[node.id][i].lineObject;
         let neighborId = adjacencyList[node.id][i];
-        steps.push({"elements": [node, edge, edge], "actions": ["remove", "add", "add"], "classList": ["currentNode", "discoveredEdge", "currentEdge"], "indices": [1], "print": `Try edge ${node.id} -> ${neighborId}`, "clearCurrent": true});
+        steps.push({"elements": [node, edge, edge], "actions": ["remove", "add", "add"], "attributeList": ["currentNode", "discoveredEdge", "currentEdge"], "indices": [1], "print": `Try edge ${node.id} -> ${neighborId}`, "clearCurrent": true});
 
         // Go on to neighbor node:
         if(!discovered.includes(neighborId)){
             let neighbor = svg.getElementById(neighborId);
-            neighbor.setAttribute("parent", node.id);
-            steps.push({"elements": [edge, neighbor], "actions": ["remove", "add"], "classList": ["currentEdge", "goingTo"], "indices": [2], "print": `Node ${neighborId} unvisited`, "clearCurrent": false});
+            steps.push({"elements": [edge, neighbor, neighbor], "actions": ["remove", "add", "setParent"], "attributeList": ["currentEdge", "goingTo", node.id], "indices": [2], "print": `Node ${neighborId} unvisited`, "clearCurrent": false});
             DFS(neighbor);
-            steps[steps.length-1] = {"elements": [neighbor, neighbor, node], "actions": ["remove", "add", "add"], "classList": ["currentNode", "finishedNode", "currentNode"], "indices": [4], "print": `Done with DFS(${neighborId}). Back to DFS(${node.id})`, "clearCurrent": true}; // Override prior entry to make node current.
+            steps[steps.length-1] = {"elements": [neighbor, neighbor, node], "actions": ["remove", "add", "add"], "attributeList": ["currentNode", "finishedNode", "currentNode"], "indices": [4], "print": `Done with DFS(${neighborId}). Back to DFS(${node.id})`, "clearCurrent": true}; // Override prior entry to make node current.
         }else{
             // Node already discovered, so this edge will not actually be explored.
-            steps.push({"elements": [edge, node], "actions": ["remove", "add"], "classList": ["currentEdge", "currentNode"], "indices": [3], "print": `Node ${neighborId} already visited. Back to node ${node.id}`, "clearCurrent": true}); // clearCurrent = false?
+            steps.push({"elements": [edge, node], "actions": ["remove", "add"], "attributeList": ["currentEdge", "currentNode"], "indices": [3], "print": `Node ${neighborId} already visited. Back to node ${node.id}`, "clearCurrent": true}); // clearCurrent = false?
         }
     }
    
     // Node finished:
-    steps.push({"elements": [node, node], "actions": ["remove", "add"], "classList": ["currentNode", "finishedNode"], "indices": [4], "print": `Done with DFS(${node.id})`, "clearCurrent": true});  // If node is startNode, this will not be overridden. Mark node as finished.
+    steps.push({"elements": [node, node], "actions": ["remove", "add"], "attributeList": ["currentNode", "finishedNode"], "indices": [4], "print": `Done with DFS(${node.id})`, "clearCurrent": true});  // If node is startNode, this will not be overridden. Mark node as finished.
 }
 
 function Dijkstra(node){
@@ -523,7 +527,7 @@ function Dijkstra(node){
         remainingNodeIDs.push(i); 
     }
     distances[node.id] = 0;
-    steps.push({"elements": [], "actions": [], "classList": [], "indices": [0, 1], "print": `Distance from source node ${node.id} to itself = 0.\nAll other distances = Infinity\nAll parents = null\nQ = priority queue of all nodes`, "clearCurrent": true});
+    steps.push({"elements": [], "actions": [], "attributeList": [], "indices": [0, 1], "print": `Distance from source node ${node.id} to itself = 0.\nAll other distances = Infinity\nAll parents = null\nQ = priority queue of all nodes`, "clearCurrent": true});
     let priorNode = null;
     let currentNode = null;
 
@@ -540,9 +544,9 @@ function Dijkstra(node){
         currentNode = svg.getElementById(currentNodeId);
 
         if(priorNode == null){
-            steps.push({"elements": [currentNode, currentNode], "actions": ["add", "add"], "classList": ["discoveredNode", "currentNode"], "indices": [2, 3], "print": `Q = {${remainingNodeIDs}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
+            steps.push({"elements": [currentNode, currentNode], "actions": ["add", "add"], "attributeList": ["discoveredNode", "currentNode"], "indices": [2, 3], "print": `Q = {${remainingNodeIDs}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
         }else{
-            steps.push({"elements": [currentNode, currentNode, priorNode, priorNode, priorNode], "actions": ["add", "add", "remove", "add", "remove"], "classList": ["discoveredNode", "currentNode", "currentNode", "finishedNode", "comingFrom"], "indices": [2, 3], "print": `Q = {${remainingNodeIDs}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
+            steps.push({"elements": [currentNode, currentNode, priorNode, priorNode, priorNode], "actions": ["add", "add", "remove", "add", "remove"], "attributeList": ["discoveredNode", "currentNode", "currentNode", "finishedNode", "comingFrom"], "indices": [2, 3], "print": `Q = {${remainingNodeIDs}} is not empty\nExploring neighbors of node v = ${currentNodeId}`, "clearCurrent": true});
         }
         remainingNodeIDs.splice(minIndex, 1);
 
@@ -552,23 +556,23 @@ function Dijkstra(node){
             let edge = svg.getElementById(`edge${currentNodeId}_${neighborId}`);
             let weight = parseInt(edge.nextElementSibling.textContent);
             
-            steps.push({"elements": [currentNode, currentNode, edge, edge], "actions": ["remove", "add", "add", "add"], "classList": ["currentNode", "comingFrom", "discoveredEdge", "currentEdge"], "indices": [4], "print": `Try edge ${currentNodeId} -> ${neighborId}`, "clearCurrent": true});
+            steps.push({"elements": [currentNode, currentNode, edge, edge], "actions": ["remove", "add", "add", "add"], "attributeList": ["currentNode", "comingFrom", "discoveredEdge", "currentEdge"], "indices": [4], "print": `Try edge ${currentNodeId} -> ${neighborId}`, "clearCurrent": true});
 
             let currentNodeDistance = distances[currentNodeId];
             let neighborDistance = distances[neighborId];
             if(neighborDistance > currentNodeDistance + weight){
-                steps.push({"elements": [edge, neighbor], "actions": ["remove", "add"], "classList": ["currentEdge", "discoveredNode"], "indices": [5, 6, 7], "print": `Node ${neighborId}'s current distance ${neighborDistance == Infinity ? "∞" : neighborDistance} > new weight ${currentNodeDistance + weight} (${currentNodeDistance} + ${weight})\nSet node ${neighborId}'s distance = ${currentNodeDistance + weight}\nSet node ${neighborId}'s parent = node ${currentNodeId}`, "clearCurrent": false});
+                steps.push({"elements": [edge, neighbor, neighbor], "actions": ["remove", "add", "setParent"], "attributeList": ["currentEdge", "discoveredNode", currentNodeId], "indices": [5, 6, 7], "print": `Node ${neighborId}'s current distance ${neighborDistance == Infinity ? "∞" : neighborDistance} > new weight ${currentNodeDistance + weight} (${currentNodeDistance} + ${weight})\nSet node ${neighborId}'s distance = ${currentNodeDistance + weight}\nSet node ${neighborId}'s parent = node ${currentNodeId}`, "clearCurrent": false});
                 // This new path is shorter.
                 distances[neighborId] = currentNodeDistance + weight;
                 parents[neighborId] = currentNodeId;
             }else{
                 // Ignore this edge.
-                steps.push({"elements": [edge], "actions": ["remove"], "classList": ["currentEdge"], "indices": [8], "print": `Node ${neighborId}'s current distance ${neighborDistance} ${neighborDistance < currentNodeDistance + weight ? "<" : "="} new weight ${currentNodeDistance + weight} (${currentNodeDistance} + ${weight})\nNo change needed`, "clearCurrent": false});
+                steps.push({"elements": [edge], "actions": ["remove"], "attributeList": ["currentEdge"], "indices": [8], "print": `Node ${neighborId}'s current distance ${neighborDistance} ${neighborDistance < currentNodeDistance + weight ? "<" : "="} new weight ${currentNodeDistance + weight} (${currentNodeDistance} + ${weight})\nNo change needed`, "clearCurrent": false});
             }
         }
         priorNode = currentNode;
     }
-    steps.push({"elements": [currentNode, currentNode, currentNode], "actions": ["remove", "remove", "add"], "classList": ["currentNode", "comingFrom", "finishedNode"], "indices": [], "print": `Dijkstra(${node.id}) Done`, "clearCurrent": true});
+    steps.push({"elements": [currentNode, currentNode, currentNode], "actions": ["remove", "remove", "add"], "attributeList": ["currentNode", "comingFrom", "finishedNode"], "indices": [], "print": `Dijkstra(${node.id}) Done`, "clearCurrent": true});
     console.log(distances);
 }
 
