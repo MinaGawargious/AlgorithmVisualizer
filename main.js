@@ -90,6 +90,7 @@ form.onsubmit = (event) => {
         startNode.classList.remove("startNode");
         startNode = svg.getElementById(parseInt(start.value));
         startNode.classList.add("startNode");
+        start.value = "";
     }
 }
 
@@ -278,10 +279,8 @@ addButton.addEventListener("click", (event) => {
     createNewNode();
 });
 
-// I may consider changing this for speed: have an array of length numNodes, with each node's parent id, DOM element, and edge element from parent to itself. 
-// This avoids a document lookup at the expense of more memory used to store the DOM elements.
+// I may consider changing this for speed: have an array of length numNodes, with each node's parent id, DOM element, & edge element from parent to itself. This avoids a document lookup at the expense of more memory used to store the DOM elements.
 function updateHighlight(highlight, node){
-    // console.log((highlight ? "H" : "Unh") + "ighlighting node ", node.id);
     // Highlight or unhighlight all nodes and edges from startNode to NODE.
     highlight ? node.classList.add("highlightedNode") : node.classList.remove("highlightedNode");
     if(node != startNode && node.hasAttribute("parent")){
@@ -295,8 +294,7 @@ function updateHighlight(highlight, node){
 
 svg.addEventListener("mousemove", (event) => {
     event.preventDefault();
-    let X = event.offsetX;
-    let Y = event.offsetY;
+    let X = event.offsetX, Y = event.offsetY;
     if(newLine != null){
         updateSingleConnection(newLine, newWeightText, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, X, Y);
     }else if(draggedItem != null && draggedItem.tagName == "circle"){
@@ -332,12 +330,10 @@ svg.addEventListener("mouseup", (event) => {
 
 // Called when we edit a label's text to adjust the position.
 function editLabel(label){
-    let node1Id = label.getAttribute("node1");
-    let node2Id = label.getAttribute("node2");
-    let node1 = svg.getElementById(node1Id);
-    let node2 = svg.getElementById(node2Id);
-
+    let node1Id = label.getAttribute("node1"), node2Id = label.getAttribute("node2");
+    let node1 = svg.getElementById(node1Id), node2 = svg.getElementById(node2Id);
     let incomingEntry = lines[node1Id][adjacencyList[node1Id].indexOf(node2Id)];
+    
     if(!adjacencyList[node2Id].includes(node1Id)){ // Single connection.
         updateSingleConnection(incomingEntry.lineObject, incomingEntry.label, node1.cx.baseVal.value, node1.cy.baseVal.value, node2.cx.baseVal.value, node2.cy.baseVal.value);
     }else{ // Double connection.
@@ -489,8 +485,8 @@ function BFS(node){
 function DFS(node){
     // Highlight node as current:
     steps.push({"elements": [node, node, node], "actions": ["add", "add", "remove"], "attributeList": ["discoveredNode", "currentNode", "goingTo"], "indices": [0], "print": `DFS(${node.id})`, "clearCurrent": true});
-
     discovered.push(node.id);
+
     // Loop through the edges:
     for(let i in adjacencyList[node.id]){
         // Dehighlight node, highlight current edge.
@@ -516,14 +512,12 @@ function DFS(node){
 
 function Dijkstra(node){
     // Dijkstra's is basically weighted BFS.
-    // Initialize all distances to infinity, except distance from source to source, which is 0. Also initialize all parents as null and Q = all nodes:
+    // Initialize all distances to infinity, except distance from source to source is 0. Also initialize all parents as null and Q = all nodes:
     let distances = [];
-    let parents = [];
     let remainingNodeIDs = []; // Q
 
     for(let i = 0; i < numNodes; i++){
         distances.push(Infinity);
-        parents.push(null);
         remainingNodeIDs.push(i); 
     }
     distances[node.id] = 0;
@@ -564,7 +558,6 @@ function Dijkstra(node){
                 steps.push({"elements": [edge, neighbor, neighbor], "actions": ["remove", "add", "setParent"], "attributeList": ["currentEdge", "discoveredNode", currentNodeId], "indices": [5, 6, 7], "print": `Node ${neighborId}'s current distance ${neighborDistance == Infinity ? "∞" : neighborDistance} > new weight ${currentNodeDistance + weight} (${currentNodeDistance} + ${weight})\nSet node ${neighborId}'s distance = ${currentNodeDistance + weight}\nSet node ${neighborId}'s parent = node ${currentNodeId}`, "clearCurrent": false});
                 // This new path is shorter.
                 distances[neighborId] = currentNodeDistance + weight;
-                parents[neighborId] = currentNodeId;
             }else{
                 // Ignore this edge.
                 steps.push({"elements": [edge], "actions": ["remove"], "attributeList": ["currentEdge"], "indices": [8], "print": `Node ${neighborId}'s current distance ${neighborDistance} ${neighborDistance < currentNodeDistance + weight ? "<" : "="} new weight ${currentNodeDistance + weight} (${currentNodeDistance} + ${weight})\nNo change needed`, "clearCurrent": false});
@@ -578,4 +571,4 @@ function Dijkstra(node){
 
 function Bellman_Ford(){}
 
-// TODO: Add "parent" and "distances" to step actions, and show distances at each step. Also grey out unused edges.
+// TODO: Add "distances" to step actions, and show distances at each step. Also grey out unused edges.
