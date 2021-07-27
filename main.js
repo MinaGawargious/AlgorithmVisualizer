@@ -437,7 +437,9 @@ async function execute(){ // async is syntactic sugar to return the values as a 
         stepSlider.value++;
         // console.log("Going from ", oldValue, "to ", stepSlider.value);
         oldValue = parseInt(stepSlider.value);
-        await sleep(baseWait/speedSlider.value); // await pauses execution until the promise is resolved.
+        if(stepSlider.value != stepSlider.max){
+            await sleep(baseWait/speedSlider.value); // await pauses execution until the promise is resolved.
+        }
         if(playPause.classList.contains("play")){
             await waitListener(playPause,"click");
         }
@@ -539,7 +541,7 @@ function Dijkstra(node){
     }
     initialActions.sort(); // ["new"..."new", "old"..."old"].
     distances[node.id] = 0;
-    steps.push({"elements": [allNodes.concat(allNodes)], "actions": [initialActions], "attributeList": [distances.concat(parents)], "indices": [0, 1], "print": `Distance from source node ${node.id} to itself = 0.\nAll other distances = Infinity\nAll parents = null\nQ = priority queue of all nodes`, "clearCurrent": true}); // Sets all nodes' newDistance to Infinity and oldDistance to null. I use the parents array here as the null array instead of creating a new one.
+    steps.push({"elements": allNodes.concat(allNodes), "actions": initialActions, "attributeList": distances.concat(parents), "indices": [0, 1], "print": `Distance from source node ${node.id} to itself = 0.\nAll other distances = Infinity\nAll parents = null\nQ = priority queue of all nodes`, "clearCurrent": true}); // Sets all nodes' newDistance to Infinity and oldDistance to null. I use the parents array here as the null array instead of creating a new one.
     let priorNode = null;
     let currentNode = null;
 
