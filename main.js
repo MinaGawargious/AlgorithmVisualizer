@@ -24,6 +24,7 @@ let startNode = null;
 
 let steps = []; // {elements: [], actions: [], attributeList: [], print: String, clearCurrent: Bool}
 let discovered = [];
+let allNodes = [];
 
 let algorithms = document.querySelectorAll(".algorithm");
 for(let algorithm of algorithms){
@@ -212,6 +213,7 @@ function createNewNode(){
         node.classList.add("startNode");
         startNode = node;
     }
+    allNodes.push(node);
 
     let newText = document.createElementNS(svgns, "text");
     setAttributes(newText, {"text-anchor": "middle", "x": parseFloat(node.cx.baseVal.value)-0.5, "y": parseFloat(node.cy.baseVal.value)+4, "font-weight": "bold", "font-size": "16", "class": "disableSelect nodeText"});
@@ -416,6 +418,10 @@ function doStep(step){
             element.classList.remove(currentAttribute);
         }else if(action == "newParent"){
             element.setAttribute("parent", currentAttribute);
+            console.log(`${element.id}'s parent is ${currentAttribute}`);
+        }else if(action == "newDistance"){
+            element.setAttribute("distance", currentAttribute);
+            console.log(`${element.id}'s distance is ${currentAttribute}`);
         }
     }
 }
@@ -450,9 +456,43 @@ stepSlider.oninput = (event) => {
     }
 }
 
+function DFS(node){
+    // Highlight node as current:
+    steps.push({"elements": [node, node, node], "actions": ["add", "add", "remove"], "attributeList": ["discoveredNode", "currentNode", "goingTo"], "indices": [0], "print": `DFS(${node.id})`, "clearCurrent": true});
+    discovered.push(node.id);
+
+    // Loop through the edges:
+    for(let i in adjacencyList[node.id]){
+        // Dehighlight node, highlight current edge.
+        let edge = lines[node.id][i].lineObject;
+        let neighborId = adjacencyList[node.id][i];
+        steps.push({"elements": [node, edge, edge], "actions": ["remove", "add", "add"], "attributeList": ["currentNode", "discoveredEdge", "currentEdge"], "indices": [1], "print": `Try edge ${node.id} -> ${neighborId}`, "clearCurrent": true});
+
+        // Go on to neighbor node:
+        if(!discovered.includes(neighborId)){
+            let neighbor = svg.getElementById(neighborId);
+            steps.push({"elements": [edge, neighbor, neighbor], "actions": ["remove", "add", "newParent"], "attributeList": ["currentEdge", "goingTo", node.id], "indices": [2], "print": `Node ${neighborId} unvisited`, "clearCurrent": false});
+            DFS(neighbor);
+            steps[steps.length-1] = {"elements": [neighbor, neighbor, node], "actions": ["remove", "add", "add"], "attributeList": ["currentNode", "finishedNode", "currentNode"], "indices": [4], "print": `Done with DFS(${neighborId}). Back to DFS(${node.id})`, "clearCurrent": true}; // Override prior entry to make node current.
+        }else{
+            // Node already discovered, so this edge will not actually be explored.
+            steps.push({"elements": [edge, node], "actions": ["remove", "add"], "attributeList": ["currentEdge", "currentNode"], "indices": [3], "print": `Node ${neighborId} already visited. Back to node ${node.id}`, "clearCurrent": true}); // clearCurrent = false?
+        }
+    }
+   
+    // Node finished:
+    steps.push({"elements": [node, node], "actions": ["remove", "add"], "attributeList": ["currentNode", "finishedNode"], "indices": [4], "print": `Done with DFS(${node.id})`, "clearCurrent": true});  // If node is startNode, this will not be overridden. Mark node as finished.
+}
+
 function BFS(node){
     let Q = [node.id];
     discovered = [node.id];
+    let distances = [];
+    for(let i = 0; i < numNodes; i++){
+        distances.push(Infinity);
+    }
+    distances[node.id] = 0;
+
     steps.push({"elements": [node, node], "actions": ["add", "add"], "attributeList": ["discoveredNode", "currentNode"], "indices": [0, 1], "print": `BFS(${node.id}):\nInitialize Q = {${Q}}`, "clearCurrent": true});
     let priorNode = null;
     let currentNode = null;
@@ -470,8 +510,9 @@ function BFS(node){
             steps.push({"elements": [edge, edge, currentNode, currentNode], "actions": ["add", "add", "remove", "add"], "attributeList": ["discoveredEdge", "currentEdge", "currentNode", "comingFrom"], "indices": [4], "print": `Try edge ${currentNodeId} -> ${neighborId}`, "clearCurrent": true}); // Removing currentNode and adding comingFrom is redunant after first iteration.
             if(!discovered.includes(neighborId)){
                 let neighbor = svg.getElementById(neighborId);
-                steps.push({"elements": [neighbor, edge, neighbor, neighbor], "actions": ["add", "remove", "oldParent", "newParent"], "attributeList": ["discoveredNode", "currentEdge", null, currentNodeId], "indices": [5], "print": `Node ${neighborId} not discovered. Q.push(${neighborId})`, "clearCurrent": false});
+                steps.push({"elements": [neighbor, edge, neighbor, neighbor, neighbor, neighbor], "actions": ["add", "remove", "oldParent", "newParent", "oldDistance", "newDistance"], "attributeList": ["discoveredNode", "currentEdge", null, currentNodeId, null, distances[currentNodeId] + 1], "indices": [5], "print": `Node ${neighborId} not discovered. Q.push(${neighborId})`, "clearCurrent": false});
                 Q.push(neighborId);
+                distances[neighborId] = distances[currentNodeId] + 1;
                 discovered.push(neighborId);
             }else{ // Ignore this node.
                 steps.push({"elements": [edge], "actions": ["remove"], "attributeList": ["currentEdge"], "indices": [6], "print": `Node ${neighborId} already discovered. Skip it`, "clearCurrent": false});
@@ -482,48 +523,23 @@ function BFS(node){
     steps.push({"elements": [currentNode, currentNode, currentNode], "actions": ["remove", "remove", "add"], "attributeList": ["currentNode", "comingFrom", "finishedNode"], "indices": [], "print": `BFS(${node.id}) Done`, "clearCurrent": true});
 }
 
-function DFS(node){
-    // Highlight node as current:
-    steps.push({"elements": [node, node, node], "actions": ["add", "add", "remove"], "attributeList": ["discoveredNode", "currentNode", "goingTo"], "indices": [0], "print": `DFS(${node.id})`, "clearCurrent": true});
-    discovered.push(node.id);
-
-    // Loop through the edges:
-    for(let i in adjacencyList[node.id]){
-        // Dehighlight node, highlight current edge.
-        let edge = lines[node.id][i].lineObject;
-        let neighborId = adjacencyList[node.id][i];
-        steps.push({"elements": [node, edge, edge], "actions": ["remove", "add", "add"], "attributeList": ["currentNode", "discoveredEdge", "currentEdge"], "indices": [1], "print": `Try edge ${node.id} -> ${neighborId}`, "clearCurrent": true});
-
-        // Go on to neighbor node:
-        if(!discovered.includes(neighborId)){
-            let neighbor = svg.getElementById(neighborId);
-            steps.push({"elements": [edge, neighbor, neighbor, neighbor], "actions": ["remove", "add", "oldParent", "newParent"], "attributeList": ["currentEdge", "goingTo", null, node.id], "indices": [2], "print": `Node ${neighborId} unvisited`, "clearCurrent": false});
-            DFS(neighbor);
-            steps[steps.length-1] = {"elements": [neighbor, neighbor, node], "actions": ["remove", "add", "add"], "attributeList": ["currentNode", "finishedNode", "currentNode"], "indices": [4], "print": `Done with DFS(${neighborId}). Back to DFS(${node.id})`, "clearCurrent": true}; // Override prior entry to make node current.
-        }else{
-            // Node already discovered, so this edge will not actually be explored.
-            steps.push({"elements": [edge, node], "actions": ["remove", "add"], "attributeList": ["currentEdge", "currentNode"], "indices": [3], "print": `Node ${neighborId} already visited. Back to node ${node.id}`, "clearCurrent": true}); // clearCurrent = false?
-        }
-    }
-   
-    // Node finished:
-    steps.push({"elements": [node, node], "actions": ["remove", "add"], "attributeList": ["currentNode", "finishedNode"], "indices": [4], "print": `Done with DFS(${node.id})`, "clearCurrent": true});  // If node is startNode, this will not be overridden. Mark node as finished.
-}
-
 function Dijkstra(node){
     // Dijkstra's is basically weighted BFS.
     // Initialize all distances to infinity, except distance from source to source is 0. Also initialize all parents as null and Q = all nodes:
     let distances = [];
     let parents = [];
     let remainingNodeIDs = []; // Q
+    let initialActions = []; // For the first step, we need to go from null distances to Infinity distances for all nodes.
 
     for(let i = 0; i < numNodes; i++){
         distances.push(Infinity);
         parents.push(null);
         remainingNodeIDs.push(i); 
+        initialActions.push("oldDistance", "newDistance");
     }
+    initialActions.sort(); // ["new"..."new", "old"..."old"].
     distances[node.id] = 0;
-    steps.push({"elements": [], "actions": [], "attributeList": [], "indices": [0, 1], "print": `Distance from source node ${node.id} to itself = 0.\nAll other distances = Infinity\nAll parents = null\nQ = priority queue of all nodes`, "clearCurrent": true});
+    steps.push({"elements": [allNodes.concat(allNodes)], "actions": [initialActions], "attributeList": [distances.concat(parents)], "indices": [0, 1], "print": `Distance from source node ${node.id} to itself = 0.\nAll other distances = Infinity\nAll parents = null\nQ = priority queue of all nodes`, "clearCurrent": true}); // Sets all nodes' newDistance to Infinity and oldDistance to null. I use the parents array here as the null array instead of creating a new one.
     let priorNode = null;
     let currentNode = null;
 
@@ -557,7 +573,7 @@ function Dijkstra(node){
             let currentNodeDistance = distances[currentNodeId];
             let neighborDistance = distances[neighborId];
             if(neighborDistance > currentNodeDistance + weight){
-                steps.push({"elements": [edge, neighbor, neighbor, neighbor], "actions": ["remove", "add", "oldParent", "newParent"], "attributeList": ["currentEdge", "discoveredNode", parents[neighborId],currentNodeId], "indices": [5, 6, 7], "print": `Node ${neighborId}'s current distance ${neighborDistance == Infinity ? "∞" : neighborDistance} > new weight ${currentNodeDistance + weight} (${currentNodeDistance} + ${weight})\nSet node ${neighborId}'s distance = ${currentNodeDistance + weight}\nSet node ${neighborId}'s parent = node ${currentNodeId}`, "clearCurrent": false});
+                steps.push({"elements": [edge, neighbor, neighbor, neighbor, neighbor, neighbor], "actions": ["remove", "add", "oldParent", "newParent", "oldDistance", "newDistance"], "attributeList": ["currentEdge", "discoveredNode", parents[neighborId],currentNodeId, neighborDistance, currentNodeDistance + weight], "indices": [5, 6, 7], "print": `Node ${neighborId}'s current distance ${neighborDistance == Infinity ? "∞" : neighborDistance} > new weight ${currentNodeDistance + weight} (${currentNodeDistance} + ${weight})\nSet node ${neighborId}'s distance = ${currentNodeDistance + weight}\nSet node ${neighborId}'s parent = node ${currentNodeId}`, "clearCurrent": false});
                 // This new path is shorter.
                 parents[neighborId] = currentNodeId;
                 distances[neighborId] = currentNodeDistance + weight;
@@ -574,7 +590,6 @@ function Dijkstra(node){
 
 function Bellman_Ford(){}
 
-// TODO: Add "distances" to step actions, and show distances at each step. Also grey out unused edges.
-
+// TODO: Show distances at each step.
 
 // To allow for forward and back movement, I need the old and the new statuses. With "add" and "remove", I have that for classes, but for distances and parents, I need to track the old and new.
