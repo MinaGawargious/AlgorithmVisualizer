@@ -12,7 +12,6 @@ let sourceNode = newLine = newWeightText = draggedItem = null;
 let selectedRect = document.createElementNS(svgns, "rect");
 setAttributes(selectedRect, {"fill": "none", "stroke": "blue"});
 let selected = null;
-let weighted = true, directed = true; // TODO: Base off of current start algorithm.
 
 let adjacencyList = {}; // startID: [endIds]
 let lines = {}; // startID: [lineObject, label]
@@ -24,15 +23,14 @@ let startNode = null;
 
 let steps = []; // {elements: [], actions: [], attributeList: [], print: String, clearCurrent: Bool}
 let discovered = [];
-let allNodes = [];
 
-let algorithms = document.querySelectorAll(".algorithm");
+let algorithms = Array.from(document.getElementsByClassName("algorithm"));
 for(let algorithm of algorithms){
     algorithm.addEventListener("click", () => {
         code.classList.add("invisible");
         steps = [];
         discovered = [];
-        func = window[algorithm.classList[0]];
+        func = window[algorithm.id];
         code = document.getElementById(func.name+"Code");
         code.classList.remove("invisible");
         codeParagraphs = code.getElementsByTagName("p");
@@ -40,6 +38,8 @@ for(let algorithm of algorithms){
         console.log(algorithm);
     });
 }
+let weighted = algorithms.find(element => element.id == func.name).getAttribute("weighted") == "true";
+let directed = algorithms.find(element => element.id == func.name).getAttribute("directed") == "true"; 
 
 let h = 6, w = 4;
 let defs = document.createElementNS(svgns, "defs");
@@ -58,8 +58,7 @@ svg.appendChild(defs);
 
 let started = false;
 let stepSlider = document.getElementById("stepSlider");
-
-playPause = document.getElementsByClassName("playPause")[0];
+let playPause = document.getElementsByClassName("playPause")[0];
 playPause.onclick = (event) => {
     event.preventDefault();
     if(playPause.classList.contains("play")) { // Currently paused. Now play.
@@ -213,7 +212,6 @@ function createNewNode(){
         node.classList.add("startNode");
         startNode = node;
     }
-    allNodes.push(node);
 
     let newText = document.createElementNS(svgns, "text");
     setAttributes(newText, {"text-anchor": "middle", "x": parseFloat(node.cx.baseVal.value)-0.5, "y": parseFloat(node.cy.baseVal.value)+4, "font-weight": "bold", "font-size": "16", "class": "disableSelect nodeText"});
@@ -528,6 +526,7 @@ function BFS(node){
 function Dijkstra(node){
     // Dijkstra's is basically weighted BFS.
     // Initialize all distances to infinity, except distance from source to source is 0. Also initialize all parents as null and Q = all nodes:
+    let allNodes = Array.from(svg.getElementsByClassName("node"));
     let distances = [];
     let parents = [];
     let remainingNodeIDs = []; // Q
@@ -591,7 +590,5 @@ function Dijkstra(node){
 }
 
 function Bellman_Ford(){}
-
-// TODO: Show distances at each step.
 
 // To allow for forward and back movement, I need the old and the new statuses. With "add" and "remove", I have that for classes, but for distances and parents, I need to track the old and new.
