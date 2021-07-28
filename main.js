@@ -201,8 +201,8 @@ function setWeightedAndDirected(newWeight, newDirected){
     }
 }
 
+let radius = window.innerWidth/30;
 function createNewNode(){
-    let radius = window.innerWidth/30;
     let nodeTextGroup = document.createElementNS(svgns, "g");
     let node = document.createElementNS(svgns, "circle");
 
@@ -216,9 +216,12 @@ function createNewNode(){
     let newText = document.createElementNS(svgns, "text");
     setAttributes(newText, {"text-anchor": "middle", "x": parseFloat(node.cx.baseVal.value)-0.5, "y": parseFloat(node.cy.baseVal.value)+4, "font-weight": "bold", "font-size": "16", "class": "disableSelect nodeText"});
     newText.textContent = numNodes;
+
+    let distanceText = document.createElementNS(svgns, "text");
+    setAttributes(distanceText, {"text-anchor": "middle", "x": parseFloat(node.cx.baseVal.value)-0.5, "y": parseFloat(node.cy.baseVal.value)+radius+6, "font-weight": "bold", "font-size": "16", "class": "disableSelect nodeText"});
     adjacencyList[numNodes] = [];
     lines[numNodes++] = [];
-    nodeTextGroup.append(node, newText);
+    nodeTextGroup.append(node, newText, distanceText);
     svg.appendChild(nodeTextGroup);
 
     nodeTextGroup.addEventListener("click", (event) => {
@@ -314,6 +317,7 @@ svg.addEventListener("mousemove", (event) => {
     }else if(draggedItem != null && draggedItem.tagName == "circle"){
         setAttributes(draggedItem, {"cx": X, "cy": Y});
         setAttributes(draggedItem.nextElementSibling, {"x": X-0.5, "y": Y+4});
+        setAttributes(draggedItem.nextElementSibling.nextElementSibling, {"x": X-0.5, "y": Y+6+radius});
         updateAllLines(draggedItem);
     }
 });
@@ -418,6 +422,7 @@ function doStep(step){
             console.log(`${element.id}'s parent is ${currentAttribute}`);
         }else if(action == "newDistance"){
             element.setAttribute("distance", currentAttribute);
+            element.nextElementSibling.nextElementSibling.textContent = currentAttribute == Infinity ? "∞" : currentAttribute;
             console.log(`${element.id}'s distance is ${currentAttribute}`);
         }
     }
