@@ -81,8 +81,8 @@ function isNumber(evt) {
     return ( (charCode <= 31) || (charCode >= 48 && charCode <= 57) );
 }
 
-form = document.getElementsByTagName("form")[0];
-start = form.getElementsByTagName("input")[0];
+let form = document.getElementsByTagName("form")[0];
+let start = form.getElementsByTagName("input")[0];
 form.onpaste = event => event.preventDefault();
 form.onsubmit = (event) => {
     event.preventDefault();
@@ -292,18 +292,6 @@ function updateHighlight(highlight, node){
     }
 }
 
-svg.addEventListener("mousemove", (event) => {
-    event.preventDefault();
-    let X = event.offsetX, Y = event.offsetY;
-    if(newLine != null){
-        updateSingleConnection(newLine, newWeightText, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, X, Y);
-    }else if(draggedItem != null && draggedItem.tagName == "circle"){
-        setAttributes(draggedItem, {"cx": X, "cy": Y});
-        setAttributes(draggedItem.nextElementSibling, {"x": X-0.5, "y": Y+4});
-        updateAllLines(draggedItem);
-    }
-});
-
 function doneEditing(){
     if(svg.contains(selectedRect)){
         svg.removeChild(selectedRect);
@@ -318,6 +306,17 @@ function doneEditing(){
     }
 }
 
+svg.addEventListener("mousemove", (event) => {
+    event.preventDefault();
+    let X = event.offsetX, Y = event.offsetY;
+    if(newLine != null){
+        updateSingleConnection(newLine, newWeightText, sourceNode.cx.baseVal.value, sourceNode.cy.baseVal.value, X, Y);
+    }else if(draggedItem != null && draggedItem.tagName == "circle"){
+        setAttributes(draggedItem, {"cx": X, "cy": Y});
+        setAttributes(draggedItem.nextElementSibling, {"x": X-0.5, "y": Y+4});
+        updateAllLines(draggedItem);
+    }
+});
 svg.addEventListener("mousedown", (event) => {
     if(event.target.tagName == "circle"){
         draggedItem = event.target;
@@ -494,8 +493,7 @@ function BFS(node){
     distances[node.id] = 0;
 
     steps.push({"elements": [node, node], "actions": ["add", "add"], "attributeList": ["discoveredNode", "currentNode"], "indices": [0, 1], "print": `BFS(${node.id}):\nInitialize Q = {${Q}}`, "clearCurrent": true});
-    let priorNode = null;
-    let currentNode = null;
+    let priorNode = null, currentNode = null;
     while(Q.length > 0){
         let currentNodeId = Q.shift();
         currentNode = svg.getElementById(currentNodeId);
@@ -541,8 +539,7 @@ function Dijkstra(node){
     initialActions.sort(); // ["new"..."new", "old"..."old"].
     distances[node.id] = 0;
     steps.push({"elements": allNodes.concat(allNodes), "actions": initialActions, "attributeList": distances.concat(parents), "indices": [0, 1], "print": `Distance from source node ${node.id} to itself = 0.\nAll other distances = Infinity\nAll parents = null\nQ = priority queue of all nodes`, "clearCurrent": true}); // Sets all nodes' newDistance to Infinity and oldDistance to null. I use the parents array here as the null array instead of creating a new one.
-    let priorNode = null;
-    let currentNode = null;
+    let priorNode = null, currentNode = null;
 
     while(remainingNodeIDs.length > 0){
         // Extract remaining node with minimum distance:

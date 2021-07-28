@@ -314,7 +314,7 @@ label{
 .slider::-webkit-slider-thumb { /* Safari, Chrome, Edge */
     -webkit-appearance: none;
     appearance: none;
-    width: 7px;
+    width: 5px;
     height: 15px;
     background: #04AA6D;
     cursor: pointer;
