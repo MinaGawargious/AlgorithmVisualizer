@@ -76,22 +76,21 @@ playPause.onclick = (event) => {
     }
 };
 
-function isNumber(evt) {
-    var charCode = evt.keyCode;
-    return ( (charCode <= 31) || (charCode >= 48 && charCode <= 57) );
-}
-
 let form = document.getElementsByTagName("form")[0];
 let start = form.getElementsByTagName("input")[0];
-form.onpaste = event => event.preventDefault();
+form.onpaste = (event) => event.preventDefault();
 form.onsubmit = (event) => {
     event.preventDefault();
-    if(start.value < numNodes && start.value != startNode.id){
+    if(start.value != "" && start.value < numNodes && start.value != startNode.id){
         startNode.classList.remove("startNode");
         startNode = svg.getElementById(parseInt(start.value));
         startNode.classList.add("startNode");
         start.value = "";
     }
+}
+form.onkeypress = (event) => {
+    var charCode = event.keyCode;
+    return ( (charCode <= 31) || (charCode >= 48 && charCode <= 57) );
 }
 
 // Returns stroke, arrowhead, and end coordinates.
