@@ -66,7 +66,7 @@ playPause.onclick = (event) => {
         if(!started){
             started = true;
             func(startNode);
-            execute();
+            // execute(); // Replace with setTimeout() call.
         }
         console.log("setting max to ", steps.length);
         stepSlider.setAttribute("max", steps.length);
@@ -376,21 +376,11 @@ document.addEventListener("keydown", (event) => {
         }
     }
 });
-
-function sleep(ms){
-    return new Promise(r => setTimeout(r, ms));
-}
-
-function waitListener(Element, ListenerName) {
-    return new Promise(function (resolve, reject) {
-        var listener = event => {
-            Element.removeEventListener(ListenerName, listener);
-            resolve(event);
-        };
-        Element.addEventListener(ListenerName, listener);
-    });
-}
-
+let oldValue = 0;
+let baseWait = 2500;
+let speedSlider = document.getElementById("speedSlider");
+let timeoutId = null;
+/************************************************************ */
 function doStep(step){
     if(step > 0){
         for(let index of steps[step-1]["indices"]){
@@ -427,28 +417,6 @@ function doStep(step){
     }
 }
 
-let oldValue = 0;
-let baseWait = 2500;
-let speedSlider = document.getElementById("speedSlider");
-
-async function execute(){ // async is syntactic sugar to return the values as a resolved promise.
-    while(stepSlider.value < steps.length){
-        // Execute step at index stepSlider.value.
-        doStep(stepSlider.value);
-        stepSlider.value++;
-        // console.log("Going from ", oldValue, "to ", stepSlider.value);
-        oldValue = parseInt(stepSlider.value);
-        if(stepSlider.value != stepSlider.max){
-            await sleep(baseWait/speedSlider.value); // await pauses execution until the promise is resolved.
-        }
-        if(playPause.classList.contains("play")){
-            await waitListener(playPause,"click");
-        }
-        console.log("waitListener done. stepSlider.value = ", stepSlider.value);
-    }
-    playPause.classList.add("play");
-}
-
 stepSlider.oninput = (event) => {
     console.log(oldValue, stepSlider.value);
     let max = parseInt(stepSlider.value);
@@ -458,6 +426,7 @@ stepSlider.oninput = (event) => {
         oldValue++;
     }
 }
+/************************************************************ */
 
 function DFS(node){
     // Highlight node as current:
