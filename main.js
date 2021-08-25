@@ -61,18 +61,20 @@ let stepSlider = document.getElementById("stepSlider");
 let playPause = document.getElementsByClassName("playPause")[0];
 playPause.onclick = (event) => {
     event.preventDefault();
-    if(playPause.classList.contains("play")) { // Currently paused. Now play.
+    if(playPause.classList.contains("play") && stepSlider.value != stepSlider.max) { // Currently paused. Now play.
         playPause.classList.remove("play");
         if(!started){
             started = true;
             func(startNode);
+            console.log("setting max to ", steps.length);
+            stepSlider.setAttribute("max", steps.length);
+            stepSlider.classList.remove("disableSelect", "disableElement");
             // execute(); // Replace with setTimeout() call.
         }
-        console.log("setting max to ", steps.length);
-        stepSlider.setAttribute("max", steps.length);
-        stepSlider.classList.remove("disableSelect", "disableElement");
+        timeoutId = setTimeout(doStep, 0, parseInt(stepSlider.value));
     } else{ // Currently playing. Now pause.
         playPause.classList.add("play");
+        clear();
     }
 };
 
@@ -380,8 +382,17 @@ let oldValue = 0;
 let baseWait = 2500;
 let speedSlider = document.getElementById("speedSlider");
 let timeoutId = null;
+
+function clear(){
+    if(timeoutId != null) {
+        console.log("CLEARING");
+        clearTimeout(timeoutId);
+        timeoutId = null;
+    }
+}
+
 /************************************************************ */
-function doStep(step){
+function doStepHelper(step){
     if(step > 0){
         for(let index of steps[step-1]["indices"]){
             codeParagraphs[index].removeAttribute("style");
@@ -417,12 +428,31 @@ function doStep(step){
     }
 }
 
+function doStep(step){
+    let stepSliderValue = parseInt(stepSlider.value);
+    if(step < stepSlider.max){
+        doStepHelper(step);
+        stepSlider.value = stepSliderValue + 1;
+        oldValue = stepSliderValue + 1;
+
+        if(step < stepSlider.max - 1){
+            timeoutId = setTimeout(doStep, baseWait/speedSlider.value, step+1)
+        }else{
+            playPause.classList.add("play");
+            clear();
+        }
+    }else{
+        playPause.classList.add("play");
+        clear();
+    }
+}
+
 stepSlider.oninput = (event) => {
     console.log(oldValue, stepSlider.value);
     let max = parseInt(stepSlider.value);
     while(oldValue < max){
         console.log("oldValue = ", oldValue, " and stepSlider.value = ", stepSlider.value);
-        doStep(oldValue);
+        doStepHelper(oldValue);
         oldValue++;
     }
 }
