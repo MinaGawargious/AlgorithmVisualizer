@@ -371,6 +371,13 @@ document.addEventListener("keydown", (event) => {
             editLabel(selected);
         }
     }else if(event.key == "ArrowRight"){ // Step forward. Pause execution.
+        if(parseInt(stepSlider.value) < parseInt(stepSlider.max)){
+            playPause.classList.add("play");
+            clear();
+            doStepHelper(parseInt(stepSlider.value), true);
+            stepSlider.value = parseInt(stepSlider.value) + 1;
+            oldValue++;  
+        }
     }else if(event.key == "ArrowLeft"){ // Step back. Pause execution.
     }else if(event.key == " "){
         event.preventDefault();
@@ -393,7 +400,7 @@ function clear(){
 }
 
 /************************************************************ */
-function doStepHelper(step){
+function doStepHelper(step, forward){
     if(step > 0){
         for(let index of steps[step-1]["indices"]){
             codeParagraphs[index].removeAttribute("style");
@@ -432,7 +439,7 @@ function doStepHelper(step){
 function doStep(step){
     let stepSliderValue = parseInt(stepSlider.value);
     if(step < stepSlider.max){
-        doStepHelper(step);
+        doStepHelper(step, true);
         stepSlider.value = stepSliderValue + 1;
         oldValue = stepSliderValue + 1;
 
@@ -459,13 +466,13 @@ stepSlider.oninput = (event) => {
     if(oldValue < stepSliderValue){ // Going forward
         while(oldValue < stepSliderValue){
             console.log("oldValue = ", oldValue, " and stepSlider.value = ", stepSlider.value);
-            doStepHelper(oldValue);
+            doStepHelper(oldValue, true);
             oldValue++;
         }
     }else if(stepSliderValue < oldValue){ // Going backward
         while(stepSliderValue < oldValue){
             oldValue--;
-            doStepHelper(oldValue); // TODO: Add backwards functionality to doStepHelper (add instead of remove...)
+            doStepHelper(oldValue, false); // TODO: Add backwards functionality to doStepHelper (add instead of remove...)
         }
     }
 }
