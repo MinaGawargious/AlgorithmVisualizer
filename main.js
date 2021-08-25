@@ -373,6 +373,7 @@ document.addEventListener("keydown", (event) => {
     }else if(event.key == "ArrowRight"){ // Step forward. Pause execution.
     }else if(event.key == "ArrowLeft"){ // Step back. Pause execution.
     }else if(event.key == " "){
+        event.preventDefault();
         if(!playPause.classList.contains("disableElement")){
             playPause.click(); // execute() has event listener on click, so spacebar will simulate a click to trigger that event listener (vs. calling a function that won't trigger event listener).
         }
@@ -447,13 +448,25 @@ function doStep(step){
     }
 }
 
+stepSlider.onmousedown = (event) => {
+    console.log("CLICKED");
+    playPause.classList.add("play");
+    clear();
+}
 stepSlider.oninput = (event) => {
     console.log(oldValue, stepSlider.value);
-    let max = parseInt(stepSlider.value);
-    while(oldValue < max){
-        console.log("oldValue = ", oldValue, " and stepSlider.value = ", stepSlider.value);
-        doStepHelper(oldValue);
-        oldValue++;
+    let stepSliderValue = parseInt(stepSlider.value);
+    if(oldValue < stepSliderValue){ // Going forward
+        while(oldValue < stepSliderValue){
+            console.log("oldValue = ", oldValue, " and stepSlider.value = ", stepSlider.value);
+            doStepHelper(oldValue);
+            oldValue++;
+        }
+    }else if(stepSliderValue < oldValue){ // Going backward
+        while(stepSliderValue < oldValue){
+            oldValue--;
+            doStepHelper(oldValue); // TODO: Add backwards functionality to doStepHelper (add instead of remove...)
+        }
     }
 }
 /************************************************************ */
