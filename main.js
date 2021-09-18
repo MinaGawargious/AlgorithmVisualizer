@@ -1,3 +1,5 @@
+alert("Hello! This project is still a work-in-progress, but is around 90% done. BFS, DFS, and Dijkstra are done, as well as scrolling forward through steps. Bellman-Ford and scrolling backwards coming soon.");
+
 let svgns = "http://www.w3.org/2000/svg";
 let svg = document.querySelector("svg");
 
