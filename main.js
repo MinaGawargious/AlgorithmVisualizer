@@ -75,8 +75,7 @@ playPause.onclick = (event) => {
         }
         timeoutId = setTimeout(doStep, 0, parseInt(stepSlider.value));
     } else{ // Currently playing. Now pause.
-        playPause.classList.add("play");
-        clear();
+        pause();
     }
 };
 
@@ -374,8 +373,7 @@ document.addEventListener("keydown", (event) => {
         }
     }else if(event.key == "ArrowRight"){ // Step forward. Pause execution.
         if(parseInt(stepSlider.value) < parseInt(stepSlider.max)){
-            playPause.classList.add("play");
-            clear();
+            pause();
             doStepHelper(parseInt(stepSlider.value), true);
             stepSlider.value = parseInt(stepSlider.value) + 1;
             oldValue++;  
@@ -448,19 +446,20 @@ function doStep(step){
         if(step < stepSlider.max - 1){
             timeoutId = setTimeout(doStep, baseWait/speedSlider.value, step+1)
         }else{
-            playPause.classList.add("play");
-            clear();
+            pause();
         }
     }else{
-        playPause.classList.add("play");
-        clear();
+        pause();
     }
 }
 
-stepSlider.onmousedown = (event) => {
-    console.log("CLICKED");
+function pause(){
     playPause.classList.add("play");
     clear();
+}
+stepSlider.onmousedown = (event) => {
+    console.log("CLICKED");
+    pause();
 }
 stepSlider.oninput = (event) => {
     console.log(oldValue, stepSlider.value);
@@ -568,10 +567,9 @@ function Dijkstra(node){
 
     while(remainingNodeIDs.length > 0){
         // Extract remaining node with minimum distance:
-        let minIndex = 0, minDistance = Infinity; // Initialize minIndex to 0 so if we have disconnected nodes with distance Infinity, we take the first one and continue without trying to index -1.
+        let minIndex = 0; // Initialize minIndex to 0 so if we have disconnected nodes with distance Infinity, we take the first one and continue without trying to index -1.
         for(let i = 0; i < remainingNodeIDs.length; i++){
-            if(distances[remainingNodeIDs[i]] < minDistance){
-                minDistance = distances[remainingNodeIDs[i]];
+            if(distances[remainingNodeIDs[i]] < distances[remainingNodeIDs[minIndex]]){
                 minIndex = i;
             }
         }
