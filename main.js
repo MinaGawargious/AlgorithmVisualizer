@@ -71,7 +71,6 @@ playPause.onclick = (event) => {
             console.log("setting max to ", steps.length);
             stepSlider.setAttribute("max", steps.length);
             stepSlider.classList.remove("disableSelect", "disableElement");
-            // execute(); // Replace with setTimeout() call.
         }
         timeoutId = setTimeout(doStep, 0, parseInt(stepSlider.value));
     } else{ // Currently playing. Now pause.
@@ -378,7 +377,7 @@ document.addEventListener("keydown", (event) => {
             stepSlider.value = parseInt(stepSlider.value) + 1;
             oldValue++;  
         }
-    }else if(event.key == "ArrowLeft"){ // Step back. Pause execution.
+    }else if(event.key == "ArrowLeft"){ // TODO: Step back. Pause execution.
     }else if(event.key == " "){
         event.preventDefault();
         if(!playPause.classList.contains("disableElement")){
@@ -454,13 +453,11 @@ function doStep(step){
 }
 
 function pause(){
+    console.log("PAUSED");
     playPause.classList.add("play");
     clear();
 }
-stepSlider.onmousedown = (event) => {
-    console.log("CLICKED");
-    pause();
-}
+stepSlider.onmousedown = pause;
 stepSlider.oninput = (event) => {
     console.log(oldValue, stepSlider.value);
     let stepSliderValue = parseInt(stepSlider.value);
