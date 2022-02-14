@@ -1,5 +1,3 @@
-alert("Hello! This project is still a work-in-progress, but is around 90% done. BFS, DFS, and Dijkstra are done, as well as scrolling forward through steps. Bellman-Ford and scrolling backwards coming soon.");
-
 let svgns = "http://www.w3.org/2000/svg";
 let svg = document.querySelector("svg");
 
@@ -45,7 +43,6 @@ let directed = algorithms.find(element => element.id == func.name).getAttribute(
 
 let h = 6, w = 4;
 let defs = document.createElementNS(svgns, "defs");
-
 for (let color of ["Black"]){
     for (let distance of ["Near", "Far"]){
         let arrowheadMarker = document.createElementNS(svgns, "marker");
@@ -301,10 +298,8 @@ function doneEditing(){
         svg.removeChild(selectedRect);
     }
     if(selected != null){
-        selected.textContent = parseInt(selected.textContent.replace('|', '')); // parseInt eliminates trailing 0s. Returns NaN for not-a-number, such as empty strings.
-        if(isNaN(selected.textContent)){
-            selected.textContent = "1";
-        }
+        let parsedWeight = parseInt(selected.textContent.replace('|', '')); // parseInt eliminates trailing 0s. Returns NaN for not-a-number, such as empty strings.
+        selected.textContent = isNan(parsedWeight) ? "1" : parsedWeight;
         editLabel(selected);
         selected = null;
     }
@@ -565,7 +560,7 @@ function Dijkstra(node){
     while(remainingNodeIDs.length > 0){
         // Extract remaining node with minimum distance:
         let minIndex = 0; // Initialize minIndex to 0 so if we have disconnected nodes with distance Infinity, we take the first one and continue without trying to index -1.
-        for(let i = 0; i < remainingNodeIDs.length; i++){
+        for(let i = 1; i < remainingNodeIDs.length; i++){
             if(distances[remainingNodeIDs[i]] < distances[remainingNodeIDs[minIndex]]){
                 minIndex = i;
             }
