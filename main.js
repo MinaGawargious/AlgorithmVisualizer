@@ -299,7 +299,7 @@ function doneEditing(){
     }
     if(selected != null){
         let parsedWeight = parseInt(selected.textContent.replace('|', '')); // parseInt eliminates trailing 0s. Returns NaN for not-a-number, such as empty strings.
-        selected.textContent = isNan(parsedWeight) ? "1" : parsedWeight;
+        selected.textContent = isNaN(parsedWeight) ? "1" : parsedWeight;
         editLabel(selected);
         selected = null;
     }
@@ -459,13 +459,11 @@ stepSlider.oninput = (event) => {
     if(oldValue < stepSliderValue){ // Going forward
         while(oldValue < stepSliderValue){
             console.log("oldValue = ", oldValue, " and stepSlider.value = ", stepSlider.value);
-            doStepHelper(oldValue, true);
-            oldValue++;
+            doStepHelper(oldValue++, true);
         }
     }else if(stepSliderValue < oldValue){ // Going backward
         while(stepSliderValue < oldValue){
-            oldValue--;
-            doStepHelper(oldValue, false); // TODO: Add backwards functionality to doStepHelper (add instead of remove...)
+            doStepHelper(--oldValue, false); // TODO: Add backwards functionality to doStepHelper (add instead of remove...)
         }
     }
 }
