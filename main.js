@@ -262,26 +262,15 @@ function createNewNode(){
             newLine = sourceNode = newWeightText = null;
         }
     });
-    nodeTextGroup.addEventListener("mouseover", (event) => { // mouseenter?
-        if(started && stepSlider.value == steps.length){ // Execution done.
-            updateHighlight(true, node);
-        }
-    });
-    nodeTextGroup.addEventListener("mouseleave", (event) => {
-        if(started && stepSlider.value == steps.length){
-            console.log("leaving ", node.id);
-            updateHighlight(false, node);
-        }
-    });
+    nodeTextGroup.addEventListener("mouseover", (event) => {  updateHighlight(true, node); }); // Entering. mouseenter?
+    nodeTextGroup.addEventListener("mouseleave", (event) => { updateHighlight(false, node); }); // Leaving
 }
 
 let addButton = document.getElementsByClassName("add")[0];
-addButton.addEventListener("click", (event) => {
-    createNewNode();
-});
+addButton.addEventListener("click", (event) => { createNewNode(); });
 
 // I may consider changing this for speed: have an array of length numNodes, with each node's parent id, DOM element, & edge element from parent to itself. This avoids a document lookup at the expense of more memory used to store the DOM elements.
-function updateHighlight(highlight, node){
+function updateHighlightHelper(highlight, node){ 
     // Highlight or unhighlight all nodes and edges from startNode to NODE.
     highlight ? node.classList.add("highlightedNode") : node.classList.remove("highlightedNode");
     if(node != startNode && node.hasAttribute("parent")){
@@ -289,7 +278,12 @@ function updateHighlight(highlight, node){
         let incomingEdge = svg.getElementById(`edge${parentID}_${node.id}`);
         highlight ? incomingEdge.classList.add("highlightedEdge") : incomingEdge.classList.remove("highlightedEdge");
         let parentNode = svg.getElementById(parentID);
-        updateHighlight(highlight, parentNode);
+        updateHighlightHelper(highlight, parentNode);
+    }
+}
+function updateHighlight(highlight, node){
+    if(started && stepSlider.value == steps.length){ // Execution done
+        updateHighlightHelper(highlight, node);
     }
 }
 
@@ -323,9 +317,7 @@ svg.addEventListener("mousedown", (event) => {
     }
     doneEditing();
 });
-svg.addEventListener("mouseup", (event) => {
-    draggedItem = null;
-});
+svg.addEventListener("mouseup", (event) => { draggedItem = null; });
 
 // Called when we edit a label's text to adjust the position.
 function editLabel(label){
