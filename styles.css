@@ -2,14 +2,12 @@
     --svg-background-color: rgba(40, 44, 52, 0.925); /*#323139, #212126, #423940 */
 
     --add-color: #c6d8e3;
-    --play-color: #c6d8e3;
-    --header-color: #c6d8e3;
-    --codetrace-code-color: #c6d8e3;
+    --play-color: #c6d8e3; /* #004fff */
+    --header-color: #c6d8e3; /* #004fff */
+    --codetrace-code-color: #c6d8e3; /* #004fff */
     --codetrace-current-color: lightgreen;
     --add-hover-color: pink;
-    /* --play-color: #004fff; */
     --play-hover-color: red;
-    /* --header-color: #004fff; */
     --header-hover-color: lightgreen;
     --header-text-color: black;
     --play-hover-color: pink;
@@ -17,7 +15,6 @@
     --fillColor: orange;
     --startFillColor: orange;
     --startBorderColor: lightblue;
-    /* --codetrace-code-color: #004fff; */
   
     --nodeTextColor: white;
     --currentNodeFillColor: green;
